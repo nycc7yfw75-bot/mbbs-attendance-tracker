@@ -17,7 +17,7 @@ create policy "Users can read own attendance state"
 drop policy if exists "Users can insert own attendance state" on public.attendance_tracker_state;
 drop policy if exists "Users can update own attendance state" on public.attendance_tracker_state;
 drop policy if exists "Users can delete own attendance state" on public.attendance_tracker_state;
-revoke insert, update, delete on public.attendance_tracker_state from anon, authenticated;
+revoke all on public.attendance_tracker_state from anon, authenticated;
 grant select on public.attendance_tracker_state to authenticated;
 
 create or replace function public.save_attendance_tracker_state(
