@@ -779,7 +779,7 @@ document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && !S && /^l
 /* ---------- Supabase Auth + private, per-user cloud state ---------- */
 const SUPABASE_URL = 'https://dgfylnsieegmyxdhvcmj.supabase.co';
 // This is the Supabase publishable/anon key, not a service-role secret. Set it before deployment.
-const SUPABASE_ANON_KEY = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
+const SUPABASE_ANON_KEY = 'sb_publishable_S9BLz1_Q-PF0aoj9n68f-Q_nb-a3gnk';
 let flushing = false, dirty = false, timer = null;
 function scheduleCloud() { dirty = true; ui.sync = 'pending'; drawSync(); clearTimeout(timer); timer = setTimeout(flushNow, 700); }
 function syncText() { return { idle: 'Saved', pending: 'Unsaved changes…', saving: 'Saving…', saved: 'Synced ✓', error: 'Not synced ⚠ ' + (ui.syncErr || '') }[ui.sync]; }
