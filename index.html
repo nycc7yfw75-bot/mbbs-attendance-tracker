@@ -248,7 +248,8 @@ E.generateSessions = (state, from, to) => {
     d = E.addDays(d, 1);
   }
   for (const x of state.extras) {
-    if (x.date < from || x.date > to) continue;
+    const cutoff = state.settings.teachingEnds || '2027-06-13';
+    if (x.date < from || x.date > to || x.date > cutoff) continue;
     const en = state.entries[x.id]; if (en && en.deleted) continue;
     const base = Object.assign({ id: x.id, date: x.date, extra: true }, { start: x.start, end: x.end, subject: x.subject, type: x.type }, en && en.snap || {});
     out.push(E._finish(base, en, E.eventsOn(x.date, state.events)));
