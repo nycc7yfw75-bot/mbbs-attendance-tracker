@@ -11,8 +11,8 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1514;--card:#162120;--ink:#e6efec;--mut:#9ab0aa;--line:#2a3b38;--acc:#4fc3ad;--acc-ink:#04201a;--ok:#6fdc9f;--okbg:#12301f;--warn:#f2c35c;--warnbg:#38290a;--bad:#ff8a80;--badbg:#3b1613;--nod:#b3c0d0;--nodbg:#222c38}}
 :root[data-theme="dark"]{--bg:#0e1514;--card:#162120;--ink:#e6efec;--mut:#9ab0aa;--line:#2a3b38;--acc:#4fc3ad;--acc-ink:#04201a;--ok:#6fdc9f;--okbg:#12301f;--warn:#f2c35c;--warnbg:#38290a;--bad:#ff8a80;--badbg:#3b1613;--nod:#b3c0d0;--nodbg:#222c38}
 *{box-sizing:border-box}
-html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-text-size-adjust:100%}
+html{height:100%;min-height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;height:100dvh;min-height:100%;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-text-size-adjust:100%}
 h1,h2,h3{margin:0;line-height:1.2;letter-spacing:-.01em}
 h1{font-size:1.45rem}h2{font-size:1.15rem;margin:22px 0 10px}h3{font-size:1rem}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -26,13 +26,13 @@ input,select,textarea{min-height:44px;padding:8px 10px;border:1.5px solid var(--
 input[type=checkbox]{width:22px;min-height:22px;height:22px}
 label{display:block;font-size:.9rem;color:var(--mut);margin:10px 0 4px}
 label.chk{display:flex;gap:10px;align-items:center;color:var(--ink);font-size:1rem;margin:8px 0}
-main{max-width:1100px;margin:0 auto;padding:14px 14px 96px}
+main{flex:1 1 auto;min-height:0;min-width:0;width:100%;max-width:1100px;margin:0 auto;padding:14px 14px calc(20px + env(safe-area-inset-bottom,0px));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
 .sub{color:var(--mut);font-size:.9rem}
-nav.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1.5px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
+nav.tabs{position:relative;inset:auto;flex:0 0 auto;width:100%;display:flex;background:var(--card);border-top:1.5px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
 nav.tabs button{flex:1;border:0;border-radius:0;background:none;min-height:56px;font-size:.82rem;color:var(--mut)}
 nav.tabs button[aria-current=page]{color:var(--acc);font-weight:700;box-shadow:inset 0 3px 0 var(--acc)}
-@media (min-width:820px){nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);bottom:auto;border-top:0;border-bottom:1.5px solid var(--line)}nav.tabs button{font-size:1rem;min-height:50px}main{padding-bottom:40px}}
+@media (min-width:820px){nav.tabs{position:relative;top:auto;bottom:auto;border-top:1.5px solid var(--line);border-bottom:0}nav.tabs button{font-size:1rem;min-height:50px}}
 .card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px}
 .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
 .stats{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
@@ -89,7 +89,7 @@ details summary{cursor:pointer;min-height:36px;display:flex;align-items:center}
 const E = {};
 const EPS = 1e-9;
 const pad = n => String(n).padStart(2, '0');
-E.SCHEMA = 1;
+E.SCHEMA = 2;
 
 /* ---------- dates & time (all calendar dates are plain 'YYYY-MM-DD' strings; no local-timezone Date use) ---------- */
 E.isDate = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && E.fmt(E.parseDate(s)) === s;
@@ -170,7 +170,7 @@ E.defaultTemplate = () => {
   for (const day of Object.keys(days)) {
     const [first, rest] = days[day]; const dn = +day;
     out.push(SLOT(dn, '08:15', '09:15', first, L), SLOT(dn, '09:15', '12:15', 'Clinical Posting', CP, true));
-    rest.forEach(r => out.push(mk(dn, r)));
+    rest.forEach(r => { const slot = mk(dn, r); if (dn === 6 && (slot.subject === 'FMT' || slot.subject === 'Obstetrics & Gynaecology')) slot.type = 'Practical'; out.push(slot); });
     out.push(SLOT(dn, '16:00', '17:00', 'Sports', SP));
   }
   return out;
@@ -190,7 +190,7 @@ E.defaultEvents = () => [
 E.defaultState = () => ({
   schema: E.SCHEMA,
   settings: {
-    target: 80, startDate: '2026-10-12', termEnd: '2027-09-30', grouping: 'subjectType',
+    target: 80, startDate: '2026-10-12', teachingEnds: '2027-06-13', termEnd: '2027-09-30', grouping: 'subjectType',
     excludedTypes: ['Sports'], approved: 'excluded', denominator: 'scheduled', policyConfirmed: false,
     batch: 'D', group: 'Batch 76–100 (100 & 104)', groupConfirmed: false,
   },
@@ -213,7 +213,7 @@ E.eventCancels = (ev, s) => ev.effect === 'all' || (ev.effect === 'subjects' && 
 E.UNASSIGNED = 'Clinical posting (dept unassigned)';
 E.generateSessions = (state, from, to) => {
   const st = state.settings, out = [];
-  let d = from < st.startDate ? st.startDate : from; const end = to > st.termEnd ? st.termEnd : to;
+  let d = from < st.startDate ? st.startDate : from; const cutoff = st.teachingEnds || '2027-06-13'; const end = to > cutoff ? cutoff : to;
   while (d <= end) {
     const w = E.dow(d), evs = E.eventsOn(d, state.events);
     if (w >= 1 && w <= 6) {
@@ -368,6 +368,7 @@ E.migrate = obj => {
   if (typeof o.schema !== 'number') o.schema = 0;
   if (o.schema > E.SCHEMA) throw new Error('Backup is from a newer app version (schema ' + o.schema + '). Update the app first.');
   if (o.schema < 1) { o.entries = o.entries || {}; o.extras = o.extras || []; o.opening = o.opening || {}; o.meta = o.meta || { lastExport: null }; o.schema = 1; }
+  if (o.schema < 2) { o.settings = o.settings || {}; o.settings.teachingEnds = o.settings.teachingEnds || '2027-06-13'; o.template = o.template || E.defaultTemplate(); o.template.forEach(t => { if (t.day === 6 && t.subject === 'FMT' && t.start === '14:00') t.type = 'Practical'; if (t.day === 6 && t.subject === 'Obstetrics & Gynaecology' && t.start === '12:15') t.type = 'Practical'; }); o.schema = 2; }
   return o;
 };
 E.validate = o => {
@@ -633,7 +634,7 @@ function settings() {
    <label>Excluded session types (not counted in attendance)</label>${S.types.map(t => `<label class="chk"><input type="checkbox" class="s-ex" value="${esc(t)}" ${st.excludedTypes.includes(t) ? 'checked' : ''}>${esc(t)}</label>`).join('')}
    <p class="sub">Term total = hours conducted so far + remaining scheduled hours (from the weekly template, minus holidays you've entered) + past sessions you haven't recorded yet. Session-count rules aren't supported. Sports is excluded by default; untick it to track Sports.</p>
    <label class="chk"><input type="checkbox" id="s-pc" ${st.policyConfirmed ? 'checked' : ''}>I have confirmed these rules with the college</label>
-   <label>Term start / tracking begins</label><input type="date" id="s-start" value="${st.startDate}"><label>Term end</label><input type="date" id="s-end" value="${st.termEnd}">
+   <label>Term start / tracking begins</label><input type="date" id="s-start" value="${st.startDate}"><label>Teaching ends (attendance cutoff)</label><input type="date" id="s-teaching-end" value="${st.teachingEnds || '2027-06-13'}"><p class="sub">No attendance session after this date is counted. Default: 13 June 2027.</p><label>Term end (informational only)</label><input type="date" id="s-end" value="${st.termEnd}"><div class="banner">Date conflict: 30 Sep 2027 is Thursday, not Saturday. A separate description says 27 Sep 2027 (Monday), exactly 50 weeks after 12 Oct 2026. Term end does not affect attendance.</div>
    <div class="row" style="margin-top:10px"><button class="pri" data-a="savesettings">Save rules</button></div><div id="s-err" class="err"></div></div>
   <h2>Clinical posting batch</h2><div class="card"><div class="two"><div><label>My batch</label><input id="b-batch" value="${esc(st.batch)}"></div><div><label>Mapped rotation group</label><input id="b-group" value="${esc(st.group)}"></div></div>
    <label class="chk"><input type="checkbox" id="b-conf" ${st.groupConfirmed ? 'checked' : ''}>Mapping confirmed</label><button data-a="savebatch">Save</button>
@@ -742,7 +743,7 @@ document.addEventListener('click', ev => {
     case 'saveevent': { const e = eventFrom(ui.modal.e); if (!e.name) return err('Name is required.'); if (!E.isDate(e.from) || !E.isDate(e.to) || e.to < e.from) return err('Enter valid dates (end on or after start).'); if (e.effect === 'subjects' && !e.subjects.length) return err('Pick at least one subject.'); if (e.effect === 'types' && !e.types.length) return err('Pick at least one session type.'); ui.modal = null; mutate(S => { const i = S.events.findIndex(x => x.id === e.id); if (i >= 0) S.events[i] = e; else S.events.push(e); }, 'Calendar updated'); return; }
     case 'delev': ui.modal = { type: 'confirm', title: 'Delete this event?', body: 'Sessions it cancelled will return to the schedule. Recorded attendance is untouched.', yes: 'dodelev', label: 'Delete' }; ui.delId = d.id; return render();
     case 'dodelev': { const id = ui.delId; ui.modal = null; mutate(S => { S.events = S.events.filter(x => x.id !== id); }, 'Event deleted'); return; }
-    case 'savesettings': { const T = parseFloat(val('s-target')); const sd = val('s-start'), ed = val('s-end'); const er = $('#s-err'); if (!(T >= 0 && T <= 100)) { er.textContent = 'Target must be between 0 and 100.'; return; } if (!E.isDate(sd) || !E.isDate(ed) || ed < sd) { er.textContent = 'Check the term dates.'; return; } mutate(S => { Object.assign(S.settings, { target: T, grouping: val('s-group'), approved: val('s-appr'), denominator: val('s-den'), excludedTypes: [...document.querySelectorAll('.s-ex:checked')].map(x => x.value), policyConfirmed: $('#s-pc').checked, startDate: sd, termEnd: ed }); }, 'Rules saved'); return; }
+    case 'savesettings': { const T = parseFloat(val('s-target')); const sd = val('s-start'), td = val('s-teaching-end') || '2027-06-13', ed = val('s-end'); const er = $('#s-err'); if (!(T >= 0 && T <= 100)) { er.textContent = 'Target must be between 0 and 100.'; return; } if (!E.isDate(sd) || !E.isDate(td) || td < sd || !E.isDate(ed) || ed < sd) { er.textContent = 'Check the start, teaching-end and informational term-end dates.'; return; } mutate(S => { Object.assign(S.settings, { target: T, grouping: val('s-group'), approved: val('s-appr'), denominator: val('s-den'), excludedTypes: [...document.querySelectorAll('.s-ex:checked')].map(x => x.value), policyConfirmed: $('#s-pc').checked, startDate: sd, teachingEnds: td, termEnd: ed }); }, 'Rules saved'); return; }
     case 'savebatch': mutate(S => { S.settings.batch = val('b-batch').trim() || 'D'; S.settings.group = val('b-group').trim(); S.settings.groupConfirmed = $('#b-conf').checked; }, 'Batch saved'); return;
     case 'addrot': ui.modal = { type: 'rot', isNew: true, r: { id: uid('r'), from: '', to: '', dept: '' } }; return render();
     case 'editrot': ui.modal = { type: 'rot', r: Object.assign({}, S.rotation.find(x => x.id === d.id)) }; return render();
