@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Attendance — III MBBS Part I</title>
+<meta name="description" content="Private, cloud-synced III MBBS attendance tracker">
+<style>
+:root{--bg:#f4f6f5;--card:#fff;--ink:#14201d;--mut:#5b6b66;--line:#d8e0dd;--acc:#0b6b5c;--acc-ink:#fff;--ok:#16794a;--okbg:#e0f3e8;--warn:#8a5a00;--warnbg:#fdf0cf;--bad:#b3261e;--badbg:#fbe3e0;--nod:#475569;--nodbg:#e8ecf1;--ty-th:#1b7f3b;--ty-th-bg:#e6f4ea;--ty-th-ink:#0b5a26;--ty-pr:#1d62c7;--ty-pr-bg:#e3edfb;--ty-pr-ink:#0f4596;--ty-cl:#b42318;--ty-cl-bg:#fdecea;--ty-cl-ink:#8a1a12;--ty-ot:#6b7a76;--ty-ot-bg:transparent;--ty-ot-ink:#3d4b47;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1514;--card:#162120;--ink:#e6efec;--mut:#9ab0aa;--line:#2a3b38;--acc:#4fc3ad;--acc-ink:#04201a;--ok:#6fdc9f;--okbg:#12301f;--warn:#f2c35c;--warnbg:#38290a;--bad:#ff8a80;--badbg:#3b1613;--nod:#b3c0d0;--nodbg:#222c38;--ty-th:#4cc27a;--ty-th-bg:#12301f;--ty-th-ink:#9be8b8;--ty-pr:#6aa9ff;--ty-pr-bg:#14283f;--ty-pr-ink:#b4d3ff;--ty-cl:#ff7b73;--ty-cl-bg:#3a1816;--ty-cl-ink:#ffc2bd;--ty-ot:#8da39d;--ty-ot-bg:transparent;--ty-ot-ink:#c9d6d2}}
+:root[data-theme="dark"]{--bg:#0e1514;--card:#162120;--ink:#e6efec;--mut:#9ab0aa;--line:#2a3b38;--acc:#4fc3ad;--acc-ink:#04201a;--ok:#6fdc9f;--okbg:#12301f;--warn:#f2c35c;--warnbg:#38290a;--bad:#ff8a80;--badbg:#3b1613;--nod:#b3c0d0;--nodbg:#222c38;--ty-th:#4cc27a;--ty-th-bg:#12301f;--ty-th-ink:#9be8b8;--ty-pr:#6aa9ff;--ty-pr-bg:#14283f;--ty-pr-ink:#b4d3ff;--ty-cl:#ff7b73;--ty-cl-bg:#3a1816;--ty-cl-ink:#ffc2bd;--ty-ot:#8da39d;--ty-ot-bg:transparent;--ty-ot-ink:#c9d6d2}
+*{box-sizing:border-box}
+html{height:100%;min-height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;height:100dvh;min-height:100%;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-text-size-adjust:100%}
+h1,h2,h3{margin:0;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:1.45rem}h2{font-size:1.15rem;margin:22px 0 10px}h3{font-size:1rem}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;min-height:44px;padding:8px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--card)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+button.pri{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:600}
+button.dng{border-color:var(--bad);color:var(--bad)}
+button.sm{min-height:36px;padding:4px 10px;font-size:.9rem}
+button.link{border:0;background:none;color:var(--acc);text-decoration:underline;min-height:36px;padding:4px}
+input,select,textarea{min-height:44px;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);width:100%}
+input[type=checkbox]{width:22px;min-height:22px;height:22px}
+label{display:block;font-size:.9rem;color:var(--mut);margin:10px 0 4px}
+label.chk{display:flex;gap:10px;align-items:center;color:var(--ink);font-size:1rem;margin:8px 0}
+main{flex:1 1 auto;min-height:0;min-width:0;width:100%;max-width:1100px;margin:0 auto;padding:14px 14px calc(20px + env(safe-area-inset-bottom,0px));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.sub{color:var(--mut);font-size:.9rem}
+nav.tabs{position:relative;inset:auto;flex:0 0 auto;width:100%;display:flex;background:var(--card);border-top:1.5px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
+nav.tabs button{flex:1;border:0;border-radius:0;background:none;min-height:56px;font-size:.82rem;color:var(--mut)}
+nav.tabs button[aria-current=page]{color:var(--acc);font-weight:700;box-shadow:inset 0 3px 0 var(--acc)}
+@media (min-width:820px){nav.tabs{position:relative;top:auto;bottom:auto;border-top:1.5px solid var(--line);border-bottom:0}nav.tabs button{font-size:1rem;min-height:50px}}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
+.stats{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.stat b{display:block;font-size:1.6rem}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.8rem;font-weight:700;white-space:nowrap}
+.s-ontrack,.s-onpace,.s-present{background:var(--okbg);color:var(--ok)}
+.s-atrisk,.s-absent{background:var(--badbg);color:var(--bad)}
+.s-below,.s-partial,.s-excused{background:var(--warnbg);color:var(--warn)}
+.s-nodata,.s-none,.s-cancelled,.s-unavailable{background:var(--nodbg);color:var(--nod)}
+.ty{--c:var(--ty-ot);--cbg:var(--ty-ot-bg);--cink:var(--ty-ot-ink)}
+.ty-th{--c:var(--ty-th);--cbg:var(--ty-th-bg);--cink:var(--ty-th-ink)}
+.ty-pr{--c:var(--ty-pr);--cbg:var(--ty-pr-bg);--cink:var(--ty-pr-ink)}
+.ty-cl{--c:var(--ty-cl);--cbg:var(--ty-cl-bg);--cink:var(--ty-cl-ink)}
+.card.tyc{border-left:8px solid var(--c);background:var(--cbg)}
+.row.tyc{border-left:6px solid var(--c);background:var(--cbg);padding:4px 8px!important;border-radius:6px;margin:3px 0}
+tr.tyc>td{background:var(--cbg)}tr.tyc>td:first-child{border-left:6px solid var(--c)}
+.tychip{display:inline-block;padding:1px 8px 1px 6px;border-radius:4px;border:1.5px solid var(--c);background:var(--cbg);color:var(--cink);font-size:.78rem;font-weight:700;margin:2px 4px 2px 0;white-space:nowrap}
+.tychip::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--c);margin-right:6px}
+.tylegend{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0;font-size:.85rem}
+.bar{position:relative;height:12px;border-radius:8px;background:var(--nodbg);overflow:hidden;margin:8px 0}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--acc)}
+.bar.atrisk i,.bar.unavailable i{background:var(--bad)}.bar.below i{background:#d18b00}.bar.ontrack i,.bar.onpace i{background:var(--ok)}
+.bar u{position:absolute;top:0;bottom:0;width:3px;background:var(--ink);opacity:.8}
+.pct{font-size:2rem;font-weight:700;letter-spacing:-.02em}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row.sp{justify-content:space-between}
+.kv{display:grid;grid-template-columns:1fr auto;gap:3px 12px;font-size:.93rem}.kv span:nth-child(odd){color:var(--mut)}.kv span:nth-child(even){text-align:right}
+.banner{border-radius:12px;padding:10px 12px;margin:8px 0;background:var(--warnbg);color:var(--warn);font-size:.92rem;border:1.5px solid currentColor}
+.banner.info{background:var(--nodbg);color:var(--nod)}
+.sess{display:grid;gap:8px}
+.sess .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.sess .btns button{min-height:52px;font-weight:600}
+.sess .btns button.on{outline:3px solid var(--acc);outline-offset:1px}
+.sess .btns button.b-present.on{background:var(--okbg);color:var(--ok)}.sess .btns button.b-absent.on{background:var(--badbg);color:var(--bad)}
+.sess.cancelled{opacity:.75}
+table{width:100%;border-collapse:collapse;font-size:.92rem}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--mut);font-weight:600;font-size:.82rem}
+.scroll{overflow-x:auto}
+.week{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.day{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:8px}.day.today{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc) inset}
+.slot{border-radius:9px;padding:6px 8px;margin:6px 0;border:1px solid var(--line);font-size:.86rem;width:100%;text-align:left;min-height:0;background:var(--bg)}
+.slot b{display:block}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{min-height:36px;padding:4px 12px;border-radius:99px}.chips button[aria-pressed=true]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.modalbg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:50;padding:0}
+.modal{background:var(--card);width:100%;max-width:560px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+@media (min-width:600px){.modalbg{align-items:center;padding:20px}.modal{border-radius:18px}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:12px;z-index:60;display:flex;gap:12px;align-items:center;max-width:92%}
+.toast button{background:none;border:1.5px solid currentColor;color:inherit;min-height:36px}
+.err{color:var(--bad);font-size:.9rem;margin-top:6px}
+.two{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.mut{color:var(--mut)}.big{font-size:1.2rem;font-weight:700}
+details summary{cursor:pointer;min-height:36px;display:flex;align-items:center}
+</style>
+</head>
+<body>
+<main id="app" aria-live="polite"></main>
+<nav class="tabs" id="nav" aria-label="Main"></nav>
+<div id="overlay"></div>
+<div id="toast"></div>
+<script>
+/* Attendance engine — pure functions, no DOM. Works in browser (window.AttEngine) and Node. */
+(function (root) {
+'use strict';
+const E = {};
+const EPS = 1e-9;
+const pad = n => String(n).padStart(2, '0');
+E.SCHEMA = 2;
+
+/* ---------- dates & time (all calendar dates are plain 'YYYY-MM-DD' strings; no local-timezone Date use) ---------- */
+E.isDate = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && E.fmt(E.parseDate(s)) === s;
+E.isTime = s => typeof s === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(s);
+E.parseDate = s => { const [y, m, d] = s.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+E.fmt = d => d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate());
+E.addDays = (s, n) => { const d = E.parseDate(s); d.setUTCDate(d.getUTCDate() + n); return E.fmt(d); };
+E.dow = s => E.parseDate(s).getUTCDay();                 // 0 = Sunday
+E.mondayOf = s => { const w = E.dow(s); return E.addDays(s, w === 0 ? -6 : 1 - w); };
+E.toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+E.hours = (a, b) => (E.toMin(b) - E.toMin(a)) / 60;
+E.nowIST = (d = new Date()) => {
+  const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(d);
+  const g = t => p.find(x => x.type === t).value;
+  return { date: `${g('year')}-${g('month')}-${g('day')}`, min: (+g('hour')) * 60 + (+g('minute')) };
+};
+
+/* ---------- core arithmetic ---------- */
+const clean = x => (Math.abs(x) < EPS ? 0 : x);
+E.pct = (A, C) => (C > EPS ? (A / C) * 100 : null);
+E.meets = (A, C, T) => C > EPS && (A / C) * 100 >= T - 1e-7;
+// Additional hours that must be attended (all future hours attended) to reach T.
+E.required = (A, C, T) => {
+  if (C <= EPS || E.meets(A, C, T)) return 0;
+  const t = T / 100;
+  if (t >= 1) return Infinity;
+  return clean(Math.max(0, (t * C - A) / (1 - t)));
+};
+// Governing inequality: A + (F - M) >= t (C + F)  =>  M <= A + F - t (C + F); clamp to [0, F].
+E.maxAbsence = (A, C, F, T) => {
+  const t = T / 100;
+  return clean(Math.max(0, Math.min(F, A + F - t * (C + F))));
+};
+// Walk future sessions in order assuming attendance (optionally fractional); first session that reaches T.
+E.project = (A, C, T, list) => {
+  if (C > EPS && E.meets(A, C, T)) return { status: 'reached' };
+  if (!list.length) return { status: 'none' };
+  let a = A, c = C, n = 0;
+  for (const s of list) {
+    n++; a += s.dur * (s.frac == null ? 1 : s.frac); c += s.dur;
+    if (E.meets(a, c, T)) return { status: 'ok', session: s, count: n, pct: (a / c) * 100 };
+  }
+  return { status: 'unreachable', finalPct: c > EPS ? (a / c) * 100 : null };
+};
+// How many whole future sessions could be skipped within M hours (shortest-first, and next-in-order).
+E.skippable = (M, list) => {
+  const d = list.map(s => s.dur).sort((a, b) => a - b); let tot = 0, shortest = 0;
+  for (const x of d) { if (tot + x <= M + EPS) { tot += x; shortest++; } else break; }
+  tot = 0; let inOrder = 0;
+  for (const s of list) { if (tot + s.dur <= M + EPS) { tot += s.dur; inOrder++; } else break; }
+  return { shortest, inOrder };
+};
+E.classify = ({ C, A, F, M, T }) => {
+  if (C <= EPS) return 'nodata';
+  if (E.meets(A, C, T)) return 'ontrack';
+  if (F <= EPS) return 'unavailable';
+  return M < 2 - EPS ? 'atrisk' : 'below';
+};
+
+/* ---------- default data ---------- */
+E.STATUSES = ['none', 'present', 'absent', 'partial', 'excused', 'cancelled'];
+const SLOT = (day, start, end, subject, type, clinical) => ({ id: day + '-' + start.replace(':', ''), day, start, end, subject, type, clinical: !!clinical });
+E.defaultTemplate = () => {
+  const L = 'Theory lecture', CP = 'Clinical posting', SP = 'Sports';
+  const d = (day, a, b, c, d2, e) => [
+    SLOT(day, '08:15', '09:15', a, L), SLOT(day, '09:15', '12:15', 'Clinical Posting', CP, true),
+    ...b, SLOT(day, '16:00', '17:00', 'Sports', SP)];
+  const mk = (day, s) => SLOT(day, s[0], s[1], s[2], L);
+  const out = [];
+  const days = {
+    1: ['Medicine & Allied', [['13:00', '14:00', 'FMT'], ['14:00', '15:00', 'Community Medicine'], ['15:00', '16:00', 'Community Medicine']]],
+    2: ['Medicine & Allied', [['13:00', '14:00', 'Paediatrics'], ['14:00', '15:00', 'ENT'], ['15:00', '16:00', 'ENT']]],
+    3: ['Surgery & Allied', [['13:00', '14:00', 'FMT'], ['14:00', '15:00', 'Ophthalmology'], ['15:00', '16:00', 'Ophthalmology']]],
+    4: ['Paediatrics', [['13:00', '14:00', 'Ophthalmology'], ['14:00', '15:00', 'Obstetrics & Gynaecology'], ['15:00', '16:00', 'FMT']]],
+    5: ['ENT', [['13:00', '14:00', 'Community Medicine'], ['14:00', '15:00', 'Community Medicine'], ['15:00', '16:00', 'Community Medicine']]],
+    6: ['Surgery & Allied', [['12:15', '13:15', 'Obstetrics & Gynaecology'], ['14:00', '15:00', 'FMT'], ['15:00', '16:00', 'Community Medicine']]],
+  };
+  for (const day of Object.keys(days)) {
+    const [first, rest] = days[day]; const dn = +day;
+    out.push(SLOT(dn, '08:15', '09:15', first, L), SLOT(dn, '09:15', '12:15', 'Clinical Posting', CP, true));
+    rest.forEach(r => { const slot = mk(dn, r); if (dn === 6 && (slot.subject === 'FMT' || slot.subject === 'Obstetrics & Gynaecology')) slot.type = 'Practical'; out.push(slot); });
+    out.push(SLOT(dn, '16:00', '17:00', 'Sports', SP));
+  }
+  return out;
+};
+E.defaultEvents = () => [
+  { id: 'ev-term-start', name: 'Academic term starts', kind: 'term', from: '2026-10-12', to: '2026-10-12', effect: 'normal', subjects: [], types: [], note: '', unconfirmed: false },
+  { id: 'ev-winter', name: 'Winter vacation', kind: 'vacation', from: '2026-11-07', to: '2026-11-13', effect: 'all', subjects: [], types: [], note: '', unconfirmed: false },
+  { id: 'ev-pct1', name: 'PCT-I examinations — ENT, Ophthalmology', kind: 'exam', from: '2026-12-15', to: '2026-12-16', effect: 'normal', subjects: [], types: [], note: 'Effect on regular classes not stated in the timetable — set it when known.', unconfirmed: true },
+  { id: 'ev-t1a', name: 'I Term End Theory — Medicine, Surgery, OB/GY, Paediatrics', kind: 'exam', from: '2027-02-15', to: '2027-02-21', effect: 'normal', subjects: [], types: [], note: 'Effect on regular classes not stated — set it when known.', unconfirmed: true },
+  { id: 'ev-t1b', name: 'I Term End Theory — Community Medicine, FMT, ENT, Ophthalmology', kind: 'exam', from: '2027-02-22', to: '2027-02-28', effect: 'normal', subjects: [], types: [], note: 'Effect on regular classes not stated — set it when known.', unconfirmed: true },
+  { id: 'ev-fmtprac', name: 'FMT practical examinations', kind: 'exam', from: '2027-03-01', to: '2027-03-07', effect: 'normal', subjects: [], types: [], note: 'Effect on regular classes not stated — set it when known.', unconfirmed: true },
+  { id: 'ev-fmtautopsy', name: 'FMT autopsy posting period (batches of 15, 2 days each)', kind: 'posting', from: '2027-05-24', to: '2027-06-08', effect: 'normal', subjects: [], types: [], note: 'Overlaps summer vacation (24–30 May). Individual 2-day slots are not listed; add them as extra sessions.', unconfirmed: true },
+  { id: 'ev-summer', name: 'Summer vacation', kind: 'vacation', from: '2027-05-24', to: '2027-05-30', effect: 'all', subjects: [], types: [], note: '', unconfirmed: false },
+  { id: 'ev-prelims', name: 'Prelims — Theory & Practicals: Community Medicine, FMT, ENT, Ophthalmology', kind: 'exam', from: '2027-06-14', to: '2027-07-04', effect: 'normal', subjects: [], types: [], note: 'Effect on regular classes not stated — set it when known.', unconfirmed: true },
+  { id: 'hol-2026-dussehra', name: 'Holiday — Dussehra (college list)', kind: 'holiday', from: '2026-10-20', to: '2026-10-20', effect: 'all', observance: 'Yes', source: 'Uploaded KJ Somaiya 2026 holiday circular, p.1', subjects: [], types: [], note: 'College-listed 2026 date.', unconfirmed: false },
+  { id: 'hol-2026-diwali-bali', name: 'Holiday — Diwali (Bali Pratipada)', kind: 'holiday', from: '2026-11-10', to: '2026-11-10', effect: 'all', observance: 'Yes', source: 'Uploaded KJ Somaiya 2026 holiday circular, p.1', subjects: [], types: [], note: '', unconfirmed: false },
+  { id: 'hol-2026-bhaubeej', name: 'Holiday — Bhaubeej', kind: 'holiday', from: '2026-11-11', to: '2026-11-11', effect: 'all', observance: 'Yes', source: 'Uploaded KJ Somaiya 2026 holiday circular, p.1', subjects: [], types: [], note: '', unconfirmed: false },
+  { id: 'hol-2026-gurunanak', name: 'Holiday — Guru Nanak Jayanti', kind: 'holiday', from: '2026-11-24', to: '2026-11-24', effect: 'all', observance: 'Yes', source: 'Uploaded KJ Somaiya 2026 holiday circular, p.1', subjects: [], types: [], note: '', unconfirmed: false },
+  { id: 'hol-2026-christmas', name: 'Holiday — Christmas', kind: 'holiday', from: '2026-12-25', to: '2026-12-25', effect: 'all', observance: 'Yes', source: 'Uploaded KJ Somaiya 2026 holiday circular, p.1', subjects: [], types: [], note: '', unconfirmed: false },
+  { id: 'hol-2027-republic', name: 'Holiday — Republic Day', kind: 'holiday', from: '2027-01-26', to: '2027-01-26', effect: 'all', observance: 'Unconfirmed', source: 'https://www.officeholidays.com/countries/india/maharashtra/2027', subjects: [], types: [], note: 'Official 2027 college circular not verified.', unconfirmed: true },
+  { id: 'hol-2027-shivaji', name: 'Holiday — Chhatrapati Shivaji Maharaj Jayanti', kind: 'holiday', from: '2027-02-19', to: '2027-02-19', effect: 'all', observance: 'Unconfirmed', source: 'https://www.officeholidays.com/countries/india/maharashtra/2027', subjects: [], types: [], note: 'Official 2027 college circular not verified.', unconfirmed: true },
+  { id: 'hol-2027-shivratri', name: 'Holiday — Mahashivratri', kind: 'holiday', from: '2027-03-06', to: '2027-03-06', effect: 'all', observance: 'Unconfirmed', source: 'https://www.officeholidays.com/countries/india/maharashtra/2027', subjects: [], types: [], note: 'Official 2027 college circular not verified.', unconfirmed: true },
+  { id: 'hol-2027-eidfitr', name: 'Holiday — Ramzan Eid (TENTATIVE moon sighting)', kind: 'holiday', from: '2027-03-10', to: '2027-03-10', effect: 'all', observance: 'Unconfirmed', source: 'https://www.publicholidays.in/maharashtra/', subjects: [], types: [], note: 'TENTATIVE (moon sighting); confirm official date.', unconfirmed: true },
+  { id: 'hol-2027-holi', name: 'Holiday — Holi (Second Day)', kind: 'holiday', from: '2027-03-22', to: '2027-03-22', effect: 'all', observance: 'Unconfirmed', source: 'https://www.officeholidays.com/countries/india/maharashtra/2027', subjects: [], types: [], note: 'Official 2027 college circular not verified.', unconfirmed: true },
+  { id: 'hol-2027-goodfriday', name: 'Holiday — Good Friday', kind: 'holiday', from: '2027-03-26', to: '2027-03-26', effect: 'all', observance: 'Unconfirmed', source: 'https://www.officeholidays.com/countries/india/maharashtra/2027', subjects: [], types: [], note: 'Official 2027 college circular not verified.', unconfirmed: true },
+  { id: 'hol-2027-gudipadwa', name: 'Holiday — Gudi Padwa', kind: 'holiday', from: '2027-04-07', to: '2027-04-07', effect: 'all', observance: 'Unconfirmed', source: 'https://www.officeholidays.com/countries/india/maharashtra/2027', subjects: [], types: [], note: 'Some calendars list 8 April; verify date against official notice.', unconfirmed: true },
+  { id: 'hol-2027-ambedkar', name: 'Holiday — Dr. Babasaheb Ambedkar Jayanti', kind: 'holiday', from: '2027-04-14', to: '2027-04-14', effect: 'all', observance: 'Unconfirmed', source: 'https://www.officeholidays.com/countries/india/maharashtra/2027', subjects: [], types: [], note: 'Official 2027 college circular not verified.', unconfirmed: true },
+  { id: 'hol-2027-ramnavami', name: 'Holiday — Ram Navami', kind: 'holiday', from: '2027-04-15', to: '2027-04-15', effect: 'all', observance: 'Unconfirmed', source: 'https://www.officeholidays.com/countries/india/maharashtra/2027', subjects: [], types: [], note: 'Official 2027 college circular not verified.', unconfirmed: true },
+  { id: 'hol-2027-mahavir', name: 'Holiday — Mahavir Jayanti', kind: 'holiday', from: '2027-04-19', to: '2027-04-19', effect: 'all', observance: 'Unconfirmed', source: 'https://www.officeholidays.com/countries/india/maharashtra/2027', subjects: [], types: [], note: 'Calendar date; official college observance unverified.', unconfirmed: true },
+  { id: 'hol-2027-maharashtra', name: 'Holiday — Maharashtra Day', kind: 'holiday', from: '2027-05-01', to: '2027-05-01', effect: 'all', observance: 'Unconfirmed', source: 'Fixed-date holiday; official 2027 college observance unverified', subjects: [], types: [], note: 'Saturday.', unconfirmed: true },
+  { id: 'hol-2027-buddha', name: 'Holiday — Buddha Purnima', kind: 'holiday', from: '2027-05-20', to: '2027-05-20', effect: 'all', observance: 'Unconfirmed', source: 'https://www.officeholidays.com/countries/india/maharashtra/2027', subjects: [], types: [], note: 'Official 2027 college circular not verified.', unconfirmed: true },
+  { id: 'hol-2027-bakrid', name: 'Holiday — Bakri Eid (TENTATIVE moon sighting)', kind: 'holiday', from: '2027-05-17', to: '2027-05-17', effect: 'all', observance: 'Unconfirmed', source: 'https://www.publicholidays.in/maharashtra/', subjects: [], types: [], note: 'TENTATIVE (moon sighting); confirm official date.', unconfirmed: true },
+  { id: 'ev-termend', name: 'Listed term end date', kind: 'term', from: '2027-09-30', to: '2027-09-30', effect: 'normal', subjects: [], types: [], note: 'Timetable says Saturday; 30 Sep 2027 is a Thursday — verify.', unconfirmed: false, statedWeekday: 'Saturday' },
+];
+E.defaultState = () => ({
+  schema: E.SCHEMA,
+  settings: {
+    target: 80, startDate: '2026-10-12', teachingEnds: '2027-06-13', termEnd: '2027-09-30', grouping: 'subjectType',
+    excludedTypes: ['Sports'], approved: 'excluded', denominator: 'scheduled', policyConfirmed: false,
+    batch: 'D', group: 'Batch 76–100 (100 & 104)', groupConfirmed: false,
+  },
+  types: ['Theory lecture', 'Practical', 'Clinical posting', 'Small Group Discussion (SGD)', 'Integrated teaching', 'AETCOM', 'Seminar', 'Sports', 'Other'],
+  template: E.defaultTemplate(),
+  rotation: [
+    { id: 'rot1', from: '2026-10-12', to: '2026-10-18', dept: 'ENT' },
+    { id: 'rot2', from: '2026-10-19', to: '2026-10-25', dept: 'ENT' },
+    { id: 'rot3', from: '2026-10-26', to: '2026-11-08', dept: 'Paediatrics' },
+  ],
+  events: E.defaultEvents(),
+  entries: {}, extras: [], opening: {},
+  meta: { lastExport: null },
+});
+
+/* ---------- sessions ---------- */
+E.rotationDept = (date, rot) => { const r = rot.find(x => x.from <= date && date <= x.to); return r ? r.dept : null; };
+E.eventsOn = (date, events) => events.filter(e => e.from <= date && date <= e.to);
+E.eventCancels = (ev, s) => ev.observance === 'No' ? false : (ev.effect === 'all' || (ev.effect === 'subjects' && (ev.subjects || []).includes(s.subject)) || (ev.effect === 'types' && (ev.types || []).includes(s.type)));
+E.UNASSIGNED = 'Clinical posting (dept unassigned)';
+E.generateSessions = (state, from, to) => {
+  const st = state.settings, out = [];
+  let d = from < st.startDate ? st.startDate : from; const cutoff = st.teachingEnds || '2027-06-13'; const end = to > cutoff ? cutoff : to;
+  while (d <= end) {
+    const w = E.dow(d), evs = E.eventsOn(d, state.events);
+    if (w >= 1 && w <= 6) {
+      for (const slot of state.template) {
+        if (slot.day !== w) continue;
+        const id = d + '_' + slot.id, en = state.entries[id];
+        if (en && en.deleted) continue;
+        let base = { start: slot.start, end: slot.end, subject: slot.subject, type: slot.type };
+        if (slot.clinical) base.subject = E.rotationDept(d, state.rotation) || E.UNASSIGNED;
+        if (en && en.snap) base = Object.assign({}, base, en.snap);
+        out.push(E._finish(Object.assign({ id, date: d, slotId: slot.id, extra: false }, base), en, evs));
+      }
+    }
+    d = E.addDays(d, 1);
+  }
+  for (const x of state.extras) {
+    const cutoff = state.settings.teachingEnds || '2027-06-13';
+    if (x.date < from || x.date > to || x.date > cutoff) continue;
+    const en = state.entries[x.id]; if (en && en.deleted) continue;
+    const base = Object.assign({ id: x.id, date: x.date, extra: true }, { start: x.start, end: x.end, subject: x.subject, type: x.type }, en && en.snap || {});
+    out.push(E._finish(base, en, E.eventsOn(x.date, state.events)));
+  }
+  out.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : E.toMin(a.start) - E.toMin(b.start) || (a.id < b.id ? -1 : 1));
+  return out;
+};
+E._finish = (s, en, evs) => {
+  s.dur = E.hours(s.start, s.end);
+  s.status = (en && en.status) || 'none'; s.attMin = en && en.attMin != null ? en.attMin : null; s.note = (en && en.note) || '';
+  s.edited = !!(en && en.edited);
+  const cancelling = evs.find(ev => E.eventCancels(ev, s));
+  s.auto = false;
+  if (cancelling) {
+    s.eventName = cancelling.name;
+    if (s.status === 'none') { s.status = 'cancelled'; s.auto = true; }
+    else if (s.status !== 'cancelled') s.heldDespite = true;
+  }
+  return s;
+};
+E.contrib = (s, approved) => {
+  const D = s.dur;
+  switch (s.status) {
+    case 'present': return { cond: D, att: D, excl: 0 };
+    case 'absent': return { cond: D, att: 0, excl: 0 };
+    case 'partial': return { cond: D, att: Math.min(Math.max(s.attMin || 0, 0) / 60, D), excl: 0 };
+    case 'excused':
+      if (approved === 'attended') return { cond: D, att: D, excl: 0 };
+      if (approved === 'absent') return { cond: D, att: 0, excl: 0 };
+      return { cond: D, att: 0, excl: D };
+    default: return null;
+  }
+};
+E.isFuture = (s, now) => s.status === 'none' && (s.date > now.date || (s.date === now.date && E.toMin(s.end) > now.min));
+E.trackKey = (s, st) => st.grouping === 'subject' ? s.subject : s.subject + ' — ' + s.type;
+
+/* ---------- tracks ---------- */
+E.finalizeTrack = (t, T, mode) => {
+  mode = mode || 'conducted'; t.mode = mode;
+  t.C = Math.max(0, t.conducted - t.excluded);
+  t.A = Math.min(t.A, t.C);
+  t.missed = Math.max(0, t.C - t.A);
+  t.F = t.future.reduce((a, s) => a + s.dur, 0);
+  t.unrecH = (t.unrecordedPast || []).reduce((a, s) => a + s.dur, 0);
+  t.R = t.F + t.unrecH;
+  t.curPct = E.pct(t.A, t.C);
+  t.target = T;
+  if (mode === 'scheduled') {
+    // Denominator = all countable hours of the term: conducted so far + still to come (+ past sessions not yet recorded).
+    t.Total = t.C + t.R; t.D = t.Total;
+    t.pct = t.Total > EPS ? (t.A / t.Total) * 100 : null;
+    const need = (T / 100) * t.Total; t.need = need;
+    t.met = t.Total > EPS && t.A >= need - 1e-7;
+    t.required = t.met ? 0 : clean(Math.max(0, need - t.A));
+    t.M = clean(Math.max(0, Math.min(t.R, t.A + t.R - need)));
+    t.skip = E.skippable(t.M, t.future);
+    if (t.C <= EPS) t.proj = { status: 'nodata' };
+    else if (t.met) t.proj = { status: 'reached' };
+    else if (!t.future.length) t.proj = { status: 'none' };
+    else { let a = t.A, n = 0, hit = null; for (const s of t.future) { n++; a += s.dur; if (a >= need - 1e-7) { hit = { status: 'ok', session: s, count: n, pct: (a / t.Total) * 100 }; break; } } t.proj = hit || { status: 'unreachable', finalPct: (a / t.Total) * 100 }; }
+    t.reachable = t.C <= EPS ? null : (t.met || t.required <= t.R + EPS);
+    t.status = t.C <= EPS ? 'nodata' : t.met ? 'ontrack' : (t.required > t.R + EPS || t.M < 2 - EPS) ? 'atrisk' : 'onpace';
+    return t;
+  }
+  t.D = t.C; t.Total = t.C + t.F;
+  t.pct = E.pct(t.A, t.C);
+  t.required = E.required(t.A, t.C, T);
+  t.M = E.maxAbsence(t.A, t.C, t.F, T);
+  t.skip = E.skippable(t.M, t.future);
+  t.proj = t.C > EPS ? E.project(t.A, t.C, T, t.future) : { status: 'nodata' };
+  t.status = E.classify({ C: t.C, A: t.A, F: t.F, M: t.M, T });
+  t.reachable = t.C <= EPS ? null : (E.meets(t.A, t.C, T) || t.required <= t.F + EPS);
+  return t;
+};
+E.computeTracks = (state, now) => {
+  const st = state.settings, all = E.generateSessions(state, st.startDate, st.termEnd), tracks = {};
+  const get = s => { const k = E.trackKey(s, st); return tracks[k] || (tracks[k] = { key: k, subject: s.subject, types: [], A: 0, conducted: 0, excluded: 0, sched: 0, cancelled: 0, future: [], recorded: [], unrecordedPast: [], all: [] }); };
+  for (const s of all) {
+    if (st.excludedTypes.includes(s.type)) continue;
+    const t = get(s); if (!t.types.includes(s.type)) t.types.push(s.type); t.all.push(s);
+    if (s.status === 'cancelled') { t.cancelled += s.dur; continue; }
+    t.sched += s.dur;
+    const c = E.contrib(s, st.approved);
+    if (c) { t.conducted += c.cond; t.A += c.att; t.excluded += c.excl; t.recorded.push(s); }
+    else if (E.isFuture(s, now)) t.future.push(s); else t.unrecordedPast.push(s);
+  }
+  for (const k of Object.keys(state.opening || {})) {
+    const o = state.opening[k]; if (!(o.att >= 0 && o.cond >= 0)) continue;
+    const t = tracks[k] || (tracks[k] = { key: k, subject: k.split(' — ')[0], types: [], A: 0, conducted: 0, excluded: 0, sched: 0, cancelled: 0, future: [], recorded: [], unrecordedPast: [], all: [] });
+    t.A += o.att; t.conducted += o.cond; t.hasOpening = true;
+  }
+  Object.values(tracks).forEach(t => E.finalizeTrack(t, st.target, st.denominator || 'scheduled'));
+  return tracks;
+};
+E.overall = tracks => { let A = 0, C = 0; Object.values(tracks).forEach(t => { A += t.A; C += t.D; }); return { A, C, pct: E.pct(A, C) }; };
+
+/* ---------- what-if (never mutates state) ---------- */
+E.whatIf = (t, o) => {
+  const T = o.target != null ? o.target : t.target;
+  if (t.mode === 'scheduled') {
+    let fut = t.future.slice();
+    if (o.cancelWeeks > 0 && fut.length) { const lim = E.addDays(fut[0].date, 7 * o.cancelWeeks); fut = fut.filter(s => s.date >= lim); }
+    const N = Math.max(0, Math.floor(o.windowN || 0)), p = Math.min(1, Math.max(0, (o.windowPct || 0) / 100)), extra = Math.max(0, o.extraHours || 0);
+    fut = fut.map((s, i) => Object.assign({}, s, { frac: i < N ? p : 1 }));
+    const total = t.C + fut.reduce((a, s) => a + s.dur, 0) + extra + t.unrecH, need = (T / 100) * total;
+    const winA = fut.slice(0, N).reduce((a, s) => a + s.dur * s.frac, 0), A1 = t.A + winA;
+    const restH = fut.slice(N).reduce((a, s) => a + s.dur, 0) + extra + t.unrecH;
+    const endA = t.A + fut.reduce((a, s) => a + s.dur * s.frac, 0) + extra + t.unrecH;
+    let proj; if (t.A >= need - 1e-7) proj = { status: 'reached' }; else { let a = t.A, n = 0; proj = { status: fut.length || extra ? 'unreachable' : 'none' }; for (const s of fut) { n++; a += s.dur * s.frac; if (a >= need - 1e-7) { proj = { status: 'ok', session: s, count: n }; break; } } }
+    return { mode: 'scheduled', target: T, total, afterWindow: { A: A1, C: total, pct: E.pct(A1, total) }, end: { A: endA, C: total, pct: E.pct(endA, total) },
+      allowance: clean(Math.max(0, Math.min(restH, A1 + restH - need))), proj, meetsNow: A1 >= need - 1e-7, meetsEnd: endA >= need - 1e-7 };
+  }
+  let fut = t.future.slice();
+  if (o.cancelWeeks > 0 && fut.length) { const lim = E.addDays(fut[0].date, 7 * o.cancelWeeks); fut = fut.filter(s => s.date >= lim); }
+  const N = Math.max(0, Math.floor(o.windowN || 0)), p = Math.min(1, Math.max(0, (o.windowPct || 0) / 100));
+  fut = fut.map((s, i) => Object.assign({}, s, { frac: i < N ? p : 1 }));
+  const extra = Math.max(0, o.extraHours || 0);
+  const winA = fut.slice(0, N).reduce((a, s) => a + s.dur * s.frac, 0), winC = fut.slice(0, N).reduce((a, s) => a + s.dur, 0);
+  const A1 = t.A + winA, C1 = t.C + winC, restList = fut.slice(N), F1 = restList.reduce((a, s) => a + s.dur, 0) + extra;
+  const fullList = extra > 0 ? fut.concat([{ id: 'extra', date: fut.length ? fut[fut.length - 1].date : '', start: '', dur: extra, frac: 1, subject: 'Extra teaching' }]) : fut;
+  const totalFutA = fut.reduce((a, s) => a + s.dur * s.frac, 0) + extra, totalFutC = fut.reduce((a, s) => a + s.dur, 0) + extra;
+  return {
+    target: T, afterWindow: { A: A1, C: C1, pct: E.pct(A1, C1) },
+    end: { A: t.A + totalFutA, C: t.C + totalFutC, pct: E.pct(t.A + totalFutA, t.C + totalFutC) },
+    allowance: E.maxAbsence(A1, C1, F1, T),
+    proj: E.project(t.A, t.C, T, fullList),
+    meetsNow: E.meets(A1, C1, T), meetsEnd: E.meets(t.A + totalFutA, t.C + totalFutC, T),
+  };
+};
+
+/* ---------- backup validation / migration ---------- */
+E.migrate = obj => {
+  if (!obj || typeof obj !== 'object') throw new Error('Not a valid backup object.');
+  let o = JSON.parse(JSON.stringify(obj)); if (o.app === 'mbbs-attendance' && o.data) o = o.data;
+  if (typeof o.schema !== 'number') o.schema = 0;
+  if (o.schema > E.SCHEMA) throw new Error('Backup is from a newer app version (schema ' + o.schema + '). Update the app first.');
+  if (o.schema < 1) { o.entries = o.entries || {}; o.extras = o.extras || []; o.opening = o.opening || {}; o.meta = o.meta || { lastExport: null }; o.schema = 1; }
+  if (o.schema < 2) { o.settings = o.settings || {}; o.settings.teachingEnds = o.settings.teachingEnds || '2027-06-13'; o.template = o.template || E.defaultTemplate(); o.template.forEach(t => { if (t.day === 6 && t.subject === 'FMT' && t.start === '14:00') t.type = 'Practical'; if (t.day === 6 && t.subject === 'Obstetrics & Gynaecology' && t.start === '12:15') t.type = 'Practical'; }); o.schema = 2; }
+  return o;
+};
+E.validate = o => {
+  const err = [], req = ['settings', 'types', 'template', 'rotation', 'events', 'entries', 'extras'];
+  req.forEach(k => { if (o[k] == null) err.push('Missing "' + k + '".'); });
+  if (err.length) return err;
+  const s = o.settings;
+  if (!(typeof s.target === 'number' && s.target >= 0 && s.target <= 100)) err.push('Target must be between 0 and 100.');
+  if (!E.isDate(s.startDate) || !E.isDate(s.termEnd)) err.push('Invalid start or end date.');
+  if (!Array.isArray(s.excludedTypes)) err.push('excludedTypes must be a list.');
+  if (!['subjectType', 'subject'].includes(s.grouping)) err.push('Unknown grouping.');
+  if (s.denominator != null && !['conducted', 'scheduled'].includes(s.denominator)) err.push('Unknown denominator mode.');
+  if (!['attended', 'excluded', 'absent'].includes(s.approved)) err.push('Unknown approved-absence policy.');
+  if (!Array.isArray(o.template)) err.push('template must be a list');
+  else o.template.forEach((t, i) => { if (!(t.day >= 1 && t.day <= 6 && E.isTime(t.start) && E.isTime(t.end) && E.toMin(t.end) > E.toMin(t.start) && t.subject && t.type && t.id)) err.push('Timetable slot #' + (i + 1) + ' is invalid.'); });
+  if (!Array.isArray(o.events)) err.push('events must be a list'); else o.events.forEach((e, i) => { if (!(E.isDate(e.from) && E.isDate(e.to) && e.from <= e.to)) err.push('Event #' + (i + 1) + ' has invalid dates.'); });
+  if (!Array.isArray(o.rotation)) err.push('rotation must be a list'); else o.rotation.forEach((r, i) => { if (!(E.isDate(r.from) && E.isDate(r.to) && r.dept)) err.push('Rotation row #' + (i + 1) + ' is invalid.'); });
+  if (typeof o.entries !== 'object' || Array.isArray(o.entries)) err.push('entries must be an object.');
+  else for (const [k, v] of Object.entries(o.entries)) { if (v.status && !E.STATUSES.includes(v.status)) { err.push('Entry ' + k + ' has unknown status.'); break; } }
+  if (!Array.isArray(o.extras)) err.push('extras must be a list'); else o.extras.forEach((x, i) => { if (!(x.id && E.isDate(x.date) && E.isTime(x.start) && E.isTime(x.end) && E.toMin(x.end) > E.toMin(x.start))) err.push('Extra session #' + (i + 1) + ' is invalid.'); });
+  return err;
+};
+E.exportJSON = state => JSON.stringify({ app: 'mbbs-attendance', exportedAt: new Date().toISOString(), data: state }, null, 2);
+E.importJSON = text => { let o; try { o = JSON.parse(text); } catch (e) { throw new Error('File is not valid JSON.'); } o = E.migrate(o); const errs = E.validate(o); if (errs.length) throw new Error(errs.slice(0, 5).join(' ')); return o; };
+
+/* ---------- CSV ---------- */
+const q = v => { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+E.recordsCSV = (state, now) => {
+  const rows = [['date', 'start', 'end', 'subject', 'session_type', 'scheduled_hours', 'status', 'attended_hours', 'note']];
+  E.generateSessions(state, state.settings.startDate, now.date).forEach(s => {
+    const c = E.contrib(s, state.settings.approved);
+    rows.push([s.date, s.start, s.end, s.subject, s.type, s.dur, s.status, c ? +c.att.toFixed(4) : '', s.note]);
+  });
+  return rows.map(r => r.map(q).join(',')).join('\n');
+};
+E.summaryCSV = tracks => {
+  const rows = [['track', 'attended_h', 'countable_conducted_h', 'term_total_h', 'percent', 'target', 'status', 'additional_h_required', 'max_future_miss_h', 'future_countable_h', 'projected_date']];
+  Object.values(tracks).sort((a, b) => a.key < b.key ? -1 : 1).forEach(t => rows.push([t.key, +t.A.toFixed(4), +t.C.toFixed(4), +t.Total.toFixed(4), t.pct == null ? 'no data' : +t.pct.toFixed(2), t.target, t.status, isFinite(t.required) ? +t.required.toFixed(4) : 'unreachable', +t.M.toFixed(4), +t.F.toFixed(4), t.proj.status === 'ok' ? t.proj.session.date : t.proj.status]));
+  return rows.map(r => r.map(q).join(',')).join('\n');
+};
+
+root.AttEngine = E;
+if (typeof module !== 'undefined' && module.exports) module.exports = E;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+'use strict';
+const E = window.AttEngine, KEY = 'mbbs-att-3rdyear-v1';
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S, A = null, cloud = { ok: false, client: null, uid: null }, storageOK = true, history = [], ui = { view: 'dashboard', date: null, tab: 'week', weekStart: null, subj: null, f: { status: '', from: '', to: '' }, wi: { windowN: 2, windowPct: 0, cancelWeeks: 0, extraHours: 0, target: '' }, lmode: 'login', booting: true, sync: 'idle', conflict: false, modal: null, toast: null, agendaDate: null };
+let now = E.nowIST();
+
+/* ---------- persistence ---------- */
+/* --- Seeded-holiday merge (additive, idempotent; engine untouched). Adds seeded events by id only if absent and never re-adds ones the user removed. --- */
+function seedMerge(state) {
+  try {
+    const st = state.settings, seeded = Array.isArray(st.seededEventIds) ? st.seededEventIds : null;
+    const seeds = E.defaultEvents(), have = new Set(state.events.map(e => e.id)), add = [];
+    for (const ev of seeds) { if (seeded && seeded.includes(ev.id)) continue; if (!have.has(ev.id)) add.push(ev); }
+    st.seededEventIds = [...new Set((seeded || []).concat(seeds.map(e => e.id)))];
+    if (add.length) { add.forEach(ev => state.events.push(JSON.parse(JSON.stringify(ev)))); ui.seedNote = (ui.seedNote || 0) + add.length; ui.seedDirty = true; }
+  } catch (_) {}
+  return state;
+}
+function seedBanner() { return ui.seedNote ? `<div class="banner" role="status">Holidays added — your totals changed. ${ui.seedNote} holiday/event date${ui.seedNote === 1 ? ' was' : 's were'} added to your calendar (review or delete them in Timetable → Calendar).<div class="row" style="margin-top:8px"><button class="sm" data-a="seed-dismiss">Dismiss</button></div></div>` : ''; }
+function load() {
+  try { const raw = localStorage.getItem(KEY); if (raw) { const o = E.migrate(JSON.parse(raw)); const er = E.validate(o); if (er.length) throw new Error(er[0]); return seedMerge(o); } }
+  catch (e) { if (e && e.name === 'SecurityError') storageOK = false; else { try { localStorage.setItem(KEY + '-corrupt-' + Date.now(), localStorage.getItem(KEY)); } catch (_) {} ui.loadError = 'Saved data could not be read (' + e.message + '). The unreadable copy was kept in browser storage; starting from the default timetable. Import a backup to restore.'; } }
+  return E.defaultState();
+}
+function save() { if (A) { scheduleCloud(); return; } try { localStorage.setItem(KEY, JSON.stringify(S)); storageOK = true; } catch (e) { storageOK = false; } }
+function mutate(fn, msg) { history.push(JSON.stringify(S)); if (history.length > 40) history.shift(); fn(S); save(); toast(msg, true); render(); }
+function undo() { if (!history.length) return; S = JSON.parse(history.pop()); save(); ui.toast = null; render(); toast('Undone', false); }
+function toast(msg, canUndo) { if (!msg) return; ui.toast = { msg, canUndo }; clearTimeout(ui.tt); ui.tt = setTimeout(() => { ui.toast = null; drawToast(); }, 7000); drawToast(); }
+function drawToast() { const t = ui.toast; $('#toast').innerHTML = t ? `<div class="toast" role="status"><span>${esc(t.msg)}</span>${t.canUndo ? '<button data-a="undo">Undo</button>' : ''}</div>` : ''; }
+
+/* ---------- formatting ---------- */
+const DN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const fd = (d, long) => E.parseDate(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: long ? 'numeric' : undefined, timeZone: 'UTC' });
+const ft = t => { let [h, m] = t.split(':').map(Number); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return h + ':' + String(m).padStart(2, '0') + ' ' + ap; };
+const fh = h => !isFinite(h) ? '∞' : (+h.toFixed(2)) + ' h';
+const fp = p => p == null ? '—' : (Math.round(p * 10) / 10) + '%';
+const STL = { none: 'Not yet recorded', present: 'Present', absent: 'Absent', partial: 'Partial', excused: 'Approved absence', cancelled: 'Cancelled' };
+const TSL = { ontrack: 'Target secured', onpace: 'On pace (target not yet secured)', atrisk: 'At risk', below: 'Below target', nodata: 'Insufficient data', unavailable: 'Projection unavailable' };
+const SEV = { atrisk: 0, below: 1, unavailable: 2, nodata: 3, onpace: 4, ontrack: 5 };
+const badge = (c, t) => `<span class="badge s-${c}">${esc(t)}</span>`;
+const uid = p => p + Math.random().toString(36).slice(2, 9);
+
+function tracks() { return E.computeTracks(S, now); }
+function sessionsOn(d) { return E.generateSessions(S, d, d); }
+function tag(s) { return s.subject + ' · ' + s.type; }
+function projText(t) {
+  const p = t.proj;
+  if (p.status === 'nodata') return 'No attendance data yet';
+  if (p.status === 'reached') return 'Target reached';
+  if (p.status === 'none') return 'Cannot calculate projection';
+  if (p.status === 'unreachable') return '⚠ Target not reachable with the configured timetable';
+  const s = p.session; return fd(s.date, true) + ' · ' + ft(s.start) + ' ' + esc(s.subject) + ' (estimate)';
+}
+
+/* ---------- views ---------- */
+function render() {
+  now = E.nowIST();
+  if (!S) { $('#nav').innerHTML = ''; $('#app').innerHTML = ui.booting ? '<p class="sub" style="padding:20px">Loading…</p>' : loginHTML(); $('#overlay').innerHTML = ''; drawToast(); return; }
+  if (ui.seedDirty) { ui.seedDirty = false; save(); }
+  if (!ui.date) ui.date = now.date < S.settings.startDate ? S.settings.startDate : now.date;
+  if (!ui.weekStart) ui.weekStart = E.mondayOf(ui.date);
+  if (!ui.agendaDate) ui.agendaDate = ui.date;
+  const names = [['dashboard', 'Dashboard'], ['today', 'Today'], ['subjects', 'Subjects'], ['timetable', 'Timetable'], ['settings', 'Settings']];
+  $('#nav').innerHTML = names.map(([k, n]) => `<button data-a="nav" data-v="${k}" ${ui.view === k ? 'aria-current="page"' : ''}>${n}</button>`).join('');
+  const v = { dashboard, today, subjects, timetable, settings }[ui.view]();
+  $('#app').innerHTML = accountRow() + seedBanner() + (ui.conflict ? `<div class="banner" role="alert">This account was changed on another device since you loaded it. Saving is paused so nothing is overwritten by accident.<div class="row" style="margin-top:8px"><button class="sm" data-a="conf-load">Load the latest (discard changes made here)</button><button class="sm" data-a="conf-over">Overwrite with this device</button></div></div>` : '') + (ui.loadError ? `<div class="banner" role="alert">${esc(ui.loadError)}</div>` : '') + (!storageOK && !A ? `<div class="banner" role="alert">Browser storage is unavailable here, so changes will be lost on reload. Export a JSON backup regularly (Settings).</div>` : '') + v;
+  $('#overlay').innerHTML = ui.modal ? modalHTML() : '';
+  drawToast();
+  if (ui.view === 'subjects' && ui.subj) renderWI();
+}
+function banners(tr) {
+  const b = [], st = S.settings;
+  if (!st.groupConfirmed) b.push(`Batch ${esc(st.batch)} is provisionally mapped to “${esc(st.group)}”. Confirm or edit this in Settings. Clinical posting departments depend on it.`);
+  if (!st.policyConfirmed) b.push(`Attendance policy is unconfirmed: hours-weighted against ${st.denominator === 'conducted' ? 'hours conducted so far' : 'the full-term total hours'}, target ${st.target}%, approved absences ${st.approved === 'excluded' ? 'excluded from the denominator' : st.approved === 'attended' ? 'counted as attended' : 'counted as absent'}, grouped ${st.grouping === 'subject' ? 'by subject' : 'by subject + session type'}. This may not match the official rule.`);
+  const te = S.events.find(e => e.statedWeekday && E.fmt(E.parseDate(e.from)) && DN[E.dow(e.from)] !== e.statedWeekday);
+  if (te) b.push(`${esc(te.name)} (${fd(te.from, true)}) is stated as a ${esc(te.statedWeekday)} but is a ${DN[E.dow(te.from)]}. Verify the date.`);
+  const un = Object.values(tr).reduce((a, t) => a + t.unrecordedPast.length, 0);
+  if (un) b.push(`${un} past session${un > 1 ? 's are' : ' is'} still “Not yet recorded”. They are not counted anywhere until you record them.`);
+  const uf = Object.values(tr).find(t => t.subject === E.UNASSIGNED && t.future.length);
+  if (uf) b.push(`Clinical posting department is unknown after the last listed rotation. Those sessions are tracked as “${E.UNASSIGNED}” until you add rotation rows (Settings).`);
+  const ue = S.events.filter(e => e.unconfirmed && e.effect === 'normal' && e.to >= now.date).length;
+  if (ue) b.push(`${ue} upcoming exam/posting period${ue > 1 ? 's are' : ' is'} set to “normal teaching continues” by default. Projections assume that until you set the real effect (Timetable → Calendar).`);
+  if (!S.meta.lastExport) b.push('No backup exported yet. Browser storage can be wiped by clearing site data — export a JSON backup in Settings.');
+  else if ((Date.parse(now.date) - Date.parse(S.meta.lastExport.slice(0, 10))) / 864e5 > 14) b.push('Last backup was over 14 days ago.');
+  return b.map(x => `<div class="banner" role="note">⚠ ${x}</div>`).join('');
+}
+const TYK = { 'Theory lecture': ['th', 'Theory'], 'Practical': ['pr', 'Practical'], 'Clinical posting': ['cl', 'Clinical posting'] };
+const tyKey = t => (TYK[t] ? TYK[t][0] : 'ot');
+const tyChip = t => `<span class="tychip ty ty-${tyKey(t)}">${esc(TYK[t] ? TYK[t][1] : t)}</span>`;
+const tyCard = types => (types.length === 1 && TYK[types[0]]) ? ' tyc ty ty-' + tyKey(types[0]) : '';
+const tyRow = t => TYK[t] ? ' tyc ty ty-' + tyKey(t) : '';
+const tyLegend = () => `<div class="tylegend" role="note"><b>Key:</b> ${tyChip('Theory lecture')} ${tyChip('Practical')} ${tyChip('Clinical posting')}<span class="sub">other types stay grey · status badges keep their own colours</span></div>`;
+function trackCard(t) {
+  const cc = ui.view === 'subjects';
+  const pct = t.pct, w = pct == null ? 0 : Math.min(100, pct);
+  return `<button class="card${cc ? tyCard(t.types) : ''}" style="text-align:left;display:block;width:100%" data-a="subj" data-k="${esc(t.key)}" aria-label="Open ${esc(t.key)}">
+  <div class="row sp"><h3>${esc(t.subject)}</h3>${badge(t.status, TSL[t.status])}</div>
+  ${cc ? '<div>' + t.types.map(tyChip).join('') + '</div>' : '<div class="sub">' + esc(t.types.join(', ')) + '</div>'}
+  <div class="pct">${pct == null ? 'No data yet' : fp(pct)}${t.mode === 'scheduled' && pct != null ? ' <span class="sub">of term total</span>' : ''}</div>
+  <div class="bar ${t.status}" role="img" aria-label="${fp(pct)} of target ${t.target}%"><i style="width:${w}%"></i><u style="left:${t.target}%"></u></div>
+  <div class="kv"><span>${t.mode === 'scheduled' ? 'Attended / term total' : 'Attended / countable'}</span><span>${fh(t.A)} / ${fh(t.D)}</span>${t.mode === 'scheduled' ? `<span>So far (of conducted)</span><span>${fp(t.curPct)} of ${fh(t.C)}</span>` : ''}
+  <span>Hours still required</span><span>${t.C <= 0 ? '—' : (t.required <= 0 ? '0 h (met)' : fh(t.required) + (t.required > t.R + 1e-9 && t.mode === 'scheduled' || t.mode !== 'scheduled' && t.required > t.F ? ' ⚠' : ''))}</span>
+  <span>Can still miss</span><span>${t.C <= 0 ? '—' : fh(t.M) + ' (≈' + t.skip.shortest + ' session' + (t.skip.shortest === 1 ? '' : 's') + ')'}</span>
+  <span>Target reached by</span><span>${projText(t)}</span></div></button>`;
+}
+function dashboard() {
+  const tr = tracks(), list = Object.values(tr), cnt = s => list.filter(t => t.status === s).length;
+  const ov = E.overall(tr), todays = sessionsOn(now.date).filter(s => !S.settings.excludedTypes.includes(s.type));
+  const nextS = E.generateSessions(S, now.date, E.addDays(now.date, 14)).find(s => s.status !== 'cancelled' && !S.settings.excludedTypes.includes(s.type) && E.isFuture(s, now));
+  const ev = S.events.filter(e => e.to >= now.date && e.kind !== 'term').sort((a, b) => a.from < b.from ? -1 : 1).slice(0, 4);
+  const risk = list.filter(t => ['atrisk', 'below', 'unavailable'].includes(t.status)).sort((a, b) => SEV[a.status] - SEV[b.status] || a.M - b.M).slice(0, 4);
+  return `<div class="top"><div><h1>Attendance</h1><div class="sub">III MBBS Part I · Batch ${esc(S.settings.batch)} · target ${S.settings.target}% · ${fd(now.date, true)}</div></div></div>
+  ${banners(tr)}
+  <div class="stats" style="margin-top:10px">
+   <div class="card stat"><b>${list.length}</b>tracked</div><div class="card stat"><b>${cnt('ontrack') + cnt('onpace')}</b>meeting / on pace</div>
+   <div class="card stat"><b>${cnt('atrisk') + cnt('below') + cnt('unavailable')}</b>below target</div><div class="card stat"><b>${cnt('nodata')}</b>insufficient data</div></div>
+  <p class="sub">Informational overall: ${ov.pct == null ? 'no data yet' : fp(ov.pct) + ' (' + fh(ov.A) + ' of ' + fh(ov.C) + ')'} — total attended ÷ total ${S.settings.denominator === 'conducted' ? 'conducted' : 'term'} hours. This is not proof of eligibility; each subject/session type is assessed separately.</p>
+  <h2>Next class</h2><div class="card">${nextS ? `<b>${esc(nextS.subject)}</b> · ${esc(nextS.type)}<div class="sub">${fd(nextS.date, true)} · ${ft(nextS.start)}–${ft(nextS.end)}</div>` : '<span class="mut">No upcoming scheduled class found in the next two weeks.</span>'}</div>
+  <div class="row sp"><h2>Today</h2><button class="sm" data-a="nav" data-v="today">Open Today</button></div>
+  <div class="card">${todays.length ? todays.map(s => `<div class="row sp" style="padding:4px 0"><span>${ft(s.start)} ${esc(s.subject)} <span class="sub">${esc(s.type)}</span></span>${badge(s.status, STL[s.status] + (s.auto ? ' (' + s.eventName + ')' : ''))}</span></div>`).join('') : '<span class="mut">No classes scheduled today.</span>'}</div>
+  <h2>Needs attention</h2>${risk.length ? `<div class="grid">${risk.map(trackCard).join('')}</div>` : '<div class="card mut">Nothing below target. Subjects with no data yet are not flagged.</div>'}
+  <h2>Upcoming holidays &amp; exams</h2><div class="card">${ev.map(e => `<div class="row sp" style="padding:4px 0"><span><b>${esc(e.name)}</b><div class="sub">${fd(e.from)}${e.to !== e.from ? ' – ' + fd(e.to) : ''} · ${effLabel(e)}</div></span></div>`).join('') || '<span class="mut">None listed.</span>'}<p class="sub">No public holidays are preloaded. Add them under Timetable → Calendar so projections stay accurate.</p></div>`;
+}
+function effLabel(e) { return { normal: 'normal teaching continues' + (e.unconfirmed ? ' (unconfirmed)' : ''), all: 'all teaching cancelled', subjects: 'cancelled: ' + (e.subjects || []).join(', '), types: 'cancelled types: ' + (e.types || []).join(', ') }[e.effect]; }
+
+/* ---------- Today ---------- */
+function sessCard(s, compact) {
+  const bt = ['present', 'absent', 'partial', 'cancelled', 'none'];
+  const lab = { present: 'Present', absent: 'Absent', partial: 'Partial', cancelled: 'Cancelled', none: 'Not recorded' };
+  return `<div class="card sess ${s.status === 'cancelled' ? 'cancelled' : ''}">
+   <div class="row sp"><div><b>${ft(s.start)}–${ft(s.end)}</b> · ${fh(s.dur)}${s.extra ? ' · extra' : ''}<div class="big">${esc(s.subject)}</div><div class="sub">${esc(s.type)}${S.settings.excludedTypes.includes(s.type) ? ' · not counted (excluded type)' : ''}</div></div>
+   <div style="text-align:right">${badge(s.status, STL[s.status])}${s.status === 'partial' ? `<div class="sub">${s.attMin || 0} min attended</div>` : ''}</div></div>
+   ${s.eventName ? `<div class="sub">⚑ ${esc(s.eventName)}${s.auto ? ' — cancelled automatically. Tap Present/Absent if class was actually held.' : s.heldDespite ? ' — marked as held' : ''}</div>` : ''}
+   <div class="btns">${bt.map(b => `<button class="b-${b} ${s.status === b ? 'on' : ''}" data-a="set" data-id="${esc(s.id)}" data-d="${s.date}" data-st="${b}" aria-pressed="${s.status === b}">${lab[b]}</button>`).join('')}</div>
+   <div class="row"><button class="sm" data-a="set" data-id="${esc(s.id)}" data-d="${s.date}" data-st="excused" aria-pressed="${s.status === 'excused'}">Approved absence</button><button class="sm" data-a="editsess" data-id="${esc(s.id)}" data-d="${s.date}">Edit session</button>
+   <input aria-label="Note" placeholder="Note (optional)" value="${esc(s.note)}" data-a="note" data-id="${esc(s.id)}" data-d="${s.date}" style="flex:1;min-width:160px"></div></div>`;
+}
+function today() {
+  const d = ui.date, ss = sessionsOn(d), unrec = ss.filter(s => s.status === 'none');
+  const markable = unrec.filter(s => s.date < now.date || (s.date === now.date && E.toMin(s.end) <= now.min));
+  return `<div class="top"><h1>${d === now.date ? 'Today' : 'Attendance'} · ${fd(d, true)}</h1></div>
+  <div class="row" style="margin:8px 0"><button data-a="day" data-n="-1" aria-label="Previous day">‹ Prev</button><input type="date" value="${d}" data-a="datepick" aria-label="Pick date" style="width:auto"><button data-a="day" data-n="1" aria-label="Next day">Next ›</button>${d !== now.date ? '<button data-a="gotoday">Today</button>' : ''}</div>
+  <div class="row" style="margin-bottom:10px"><button class="pri" data-a="markall" ${markable.length ? '' : 'disabled'}>Mark ${markable.length} finished session${markable.length === 1 ? '' : 's'} Present</button><button data-a="addextra">+ Extra class</button></div>
+  <p class="sub">${ss.filter(s => s.status !== 'none').length} of ${ss.length} recorded. Nothing is counted until you tap a status.</p>
+  ${d < S.settings.startDate ? '<div class="banner info">Tracking starts on ' + fd(S.settings.startDate, true) + '. Nothing is recorded before that date.</div>' : ''}
+  ${!ss.length && d >= S.settings.startDate ? '<div class="card mut">No classes scheduled on this date (Sunday, or no template entries).</div>' : ''}
+  <div class="sess">${ss.map(s => sessCard(s)).join('')}</div>`;
+}
+
+/* ---------- Subjects ---------- */
+function subjects() {
+  const tr = tracks();
+  if (ui.subj && tr[ui.subj]) return detail(tr[ui.subj], tr);
+  const list = Object.values(tr).sort((a, b) => SEV[a.status] - SEV[b.status] || a.key.localeCompare(b.key));
+  return `<div class="top"><h1>Subjects</h1></div><p class="sub">Each subject + session type is calculated separately, in hours. The black tick marks the ${S.settings.target}% target. Projections are estimates assuming every future session is held and attended.</p>${tyLegend()}${banners(tr)}<div class="grid">${list.map(trackCard).join('')}</div>`;
+}
+function detail(t, tr) {
+  const f = ui.f, hist = t.all.filter(s => s.date <= now.date || s.status !== 'none').filter(s => (!f.status || s.status === f.status) && (!f.from || s.date >= f.from) && (!f.to || s.date <= f.to)).reverse();
+  const abs = t.all.filter(s => ['absent', 'partial', 'excused'].includes(s.status)).reverse();
+  const sib = Object.values(tr).filter(x => x.subject === t.subject && x.key !== t.key);
+  return `<button class="sm" data-a="back">‹ All subjects</button>
+  <div class="row sp${tyCard(t.types)}" style="margin-top:8px;padding:8px 12px;border-radius:12px"><div><h1>${esc(t.subject)}</h1><div>${t.types.map(tyChip).join('')}</div></div>${badge(t.status, TSL[t.status])}</div>
+  <div class="card" style="margin-top:10px"><div class="pct">${t.pct == null ? 'No attendance data yet' : fp(t.pct)}${t.mode === 'scheduled' && t.pct != null ? ' <span class="sub">of term total (' + fh(t.Total) + ')</span>' : ''}</div><div class="bar ${t.status}"><i style="width:${Math.min(100, t.pct || 0)}%"></i><u style="left:${t.target}%"></u></div>
+  <div class="kv"><span>Attended hours</span><span>${fh(t.A)}</span><span>Conducted hours (recorded)</span><span>${fh(t.conducted)}</span><span>Excluded hours (approved absences)</span><span>${fh(t.excluded)}</span><span>Countable conducted hours</span><span>${fh(t.C)}</span>${t.mode === 'scheduled' ? `<span>Attendance so far (of conducted)</span><span>${fp(t.curPct)}</span><span>Remaining + unrecorded hours</span><span>${fh(t.R)}</span><span>Term total (denominator)</span><span>${fh(t.Total)}</span><span>Hours needed in total for ${t.target}%</span><span>${fh(t.need)}</span>` : ''}<span>Missed hours</span><span>${fh(t.missed)}</span><span>Cancelled hours (not counted)</span><span>${fh(t.cancelled)}</span><span>Scheduled hours (non-cancelled, whole term)</span><span>${fh(t.sched)}</span><span>Target</span><span>${t.target}%</span>
+  <span>Additional hours required (attend all)</span><span>${t.C <= 0 ? '—' : fh(t.required)}</span><span>Future countable hours (provisional)</span><span>${fh(t.F)}</span><span>Max future hours you can miss</span><span>${t.C <= 0 ? '—' : fh(t.M)}</span><span>…as whole sessions</span><span>${t.C <= 0 ? '—' : 'up to ' + t.skip.shortest + ' (shortest first) · ' + t.skip.inOrder + ' (next in order)'}</span>
+  <span>Target reached by</span><span>${projText(t)}</span>${t.proj.status === 'ok' ? `<span>Sessions needed to get there</span><span>${t.proj.count}</span>` : ''}</div>
+  <p class="sub">Forecast assumes all remaining scheduled sessions are conducted and attended. Term total and future hours are provisional: the weekly template is projected to ${fd(S.settings.termEnd, true)}, minus holidays and cancellations you've entered.${t.hasOpening ? ' Includes imported opening totals.' : ''}</p>
+  ${t.proj.status === 'unreachable' ? '<div class="banner" role="alert">Target cannot be reached with the sessions currently configured, even with perfect attendance.</div>' : ''}</div>
+  ${sib.length ? `<h2>Other session types for ${esc(t.subject)}</h2><div class="grid">${sib.map(trackCard).join('')}</div>` : ''}
+  <h2>What-if calculator</h2><div class="card" id="wi">${wiForm(t)}<div id="wi-out" style="margin-top:12px"></div></div>
+  <h2>Attendance history</h2><div class="card"><div class="two"><div><label>Status</label><select data-a="fstatus"><option value="">All</option>${E.STATUSES.map(s => `<option value="${s}" ${f.status === s ? 'selected' : ''}>${STL[s]}</option>`).join('')}</select></div><div></div><div><label>From</label><input type="date" data-a="ffrom" value="${f.from}"></div><div><label>To</label><input type="date" data-a="fto" value="${f.to}"></div></div>
+  <div class="scroll"><table><thead><tr><th>Date</th><th>Time</th><th>Status</th><th>Hrs</th><th></th></tr></thead><tbody>${hist.map(s => { const c = E.contrib(s, S.settings.approved); return `<tr class="${tyRow(s.type).trim()}"><td>${fd(s.date)}${t.types.length > 1 ? '<div>' + tyChip(s.type) + '</div>' : ''}</td><td>${ft(s.start)}</td><td>${badge(s.status, STL[s.status])}${s.note ? `<div class="sub">${esc(s.note)}</div>` : ''}</td><td>${c ? fh(c.att) + ' / ' + fh(s.dur) : fh(s.dur)}</td><td><button class="sm" data-a="editsess" data-id="${esc(s.id)}" data-d="${s.date}">Edit</button></td></tr>`; }).join('') || '<tr><td colspan="5" class="mut">No matching records.</td></tr>'}</tbody></table></div></div>
+  <h2>Absences</h2><div class="card">${abs.map(s => `<div class="row sp${tyRow(s.type)}" style="padding:3px 0"><span>${fd(s.date, true)} · ${ft(s.start)}${t.types.length > 1 ? ' ' + tyChip(s.type) : ''}</span>${badge(s.status, STL[s.status])}</div>`).join('') || '<span class="mut">None recorded.</span>'}</div>
+  <h2>Upcoming sessions</h2><div class="card">${t.future.slice(0, 12).map(s => `<div class="row sp${tyRow(s.type)}" style="padding:3px 0"><span>${fd(s.date)} · ${ft(s.start)}–${ft(s.end)}${t.types.length > 1 ? ' ' + tyChip(s.type) : ''}</span><span class="sub">${fh(s.dur)}</span></div>`).join('') || '<span class="mut">No upcoming sessions.</span>'}${t.future.length > 12 ? `<p class="sub">+ ${t.future.length - 12} more (provisional).</p>` : ''}</div>`;
+}
+function wiForm(t) {
+  const w = ui.wi;
+  return `<p class="sub">Scenarios are temporary and never change your records.</p>
+  <div class="chips" role="group" aria-label="Presets"><button data-a="wipreset" data-p="all">Attend everything</button><button data-a="wipreset" data-p="miss2">Miss next 2</button><button data-a="wipreset" data-p="miss1">Miss next session / posting</button><button data-a="wipreset" data-p="half">Half of next session</button><button data-a="wipreset" data-p="week">Cancel a week</button><button data-a="wipreset" data-p="extra">+4 extra hours</button><button data-a="wipreset" data-p="reset">Reset</button></div>
+  <div class="two"><div><label>Next N sessions affected</label><input type="number" min="0" step="1" id="wi-n" value="${w.windowN}" data-wi="windowN"></div><div><label>Attend % of those sessions</label><input type="number" min="0" max="100" id="wi-p" value="${w.windowPct}" data-wi="windowPct"></div>
+  <div><label>Weeks of classes cancelled</label><input type="number" min="0" step="1" id="wi-w" value="${w.cancelWeeks}" data-wi="cancelWeeks"></div><div><label>Extra teaching hours (attended)</label><input type="number" min="0" step="0.5" id="wi-x" value="${w.extraHours}" data-wi="extraHours"></div>
+  <div><label>Target % (blank = ${t.target})</label><input type="number" min="0" max="100" id="wi-t" value="${w.target}" data-wi="target"></div></div>`;
+}
+function renderWI() {
+  const el = $('#wi-out'); if (!el) return; const t = tracks()[ui.subj]; if (!t) return; const w = ui.wi;
+  const T = w.target === '' ? null : +w.target;
+  if (T != null && !(T >= 0 && T <= 100)) { el.innerHTML = '<div class="err">Target must be between 0 and 100.</div>'; return; }
+  const r = E.whatIf(t, { windowN: +w.windowN, windowPct: +w.windowPct, cancelWeeks: +w.cancelWeeks, extraHours: +w.extraHours, target: T });
+  const pj = r.proj.status === 'ok' ? fd(r.proj.session.date, true) : r.proj.status === 'reached' ? 'Target reached' : r.proj.status === 'unreachable' ? '⚠ Not reachable' : 'Cannot calculate';
+  el.innerHTML = `<div class="scroll"><table><thead><tr><th></th><th>Now</th><th>After scenario window</th><th>End of term (rest attended)</th></tr></thead><tbody>
+  <tr><td>Attendance</td><td>${fp(t.pct)}</td><td>${fp(r.afterWindow.pct)}</td><td>${fp(r.end.pct)}</td></tr>
+  <tr><td>Attended h</td><td>${fh(t.A)}</td><td>${fh(r.afterWindow.A)}</td><td>${fh(r.end.A)}</td></tr>
+  <tr><td>${r.mode === 'scheduled' ? 'Term total h' : 'Countable conducted h'}</td><td>${fh(t.D)}</td><td>${fh(r.afterWindow.C)}</td><td>${fh(r.end.C)}</td></tr>
+  <tr><td>Meets ${r.target}%?</td><td>${t.mode === 'scheduled' ? (t.A >= (r.target / 100) * t.Total - 1e-7 ? 'Yes' : 'No') : (E.meets(t.A, t.C, r.target) ? 'Yes' : 'No')}</td><td>${r.meetsNow ? 'Yes' : 'No'}</td><td>${r.meetsEnd ? 'Yes' : 'No'}</td></tr></tbody></table></div>
+  <div class="kv" style="margin-top:8px"><span>Absence allowance left after window</span><span>${fh(r.allowance)}</span><span>Projected date (estimate)</span><span>${pj}</span></div>`;
+}
+
+/* ---------- Timetable ---------- */
+function timetable() {
+  const tabs = [['week', 'Week'], ['agenda', 'Daily agenda'], ['upcoming', 'Upcoming'], ['template', 'Recurring template'], ['calendar', 'Calendar']];
+  let body = '';
+  if (ui.tab === 'week') {
+    const days = [0, 1, 2, 3, 4, 5].map(i => E.addDays(ui.weekStart, i));
+    body = `<div class="row" style="margin:8px 0"><button data-a="wk" data-n="-7">‹ Prev</button><b>${fd(days[0])} – ${fd(days[5], true)}</b><button data-a="wk" data-n="7">Next ›</button><button class="sm" data-a="wk" data-n="0">This week</button></div>
+    <div class="week">${days.map(d => `<div class="day ${d === now.date ? 'today' : ''}"><b>${fd(d)}</b>${d === now.date ? ' <span class="badge s-ontrack">Today</span>' : ''}${sessionsOn(d).map(s => `<button class="slot" data-a="editsess" data-id="${esc(s.id)}" data-d="${d}"><b>${ft(s.start)} · ${fh(s.dur)}</b>${esc(s.subject)}<span class="sub"> ${esc(s.type)}</span><div>${badge(s.status, STL[s.status])}</div>${s.eventName ? `<div class="sub">⚑ ${esc(s.eventName)}</div>` : ''}</button>`).join('') || '<div class="sub">—</div>'}${E.eventsOn(d, S.events).map(e => `<div class="sub">⚑ ${esc(e.name)}</div>`).join('')}</div>`).join('')}</div><p class="sub">Lunch breaks are not sessions and never counted. Tap a session to edit or cancel it.</p>`;
+  } else if (ui.tab === 'agenda') {
+    const d = ui.agendaDate; body = `<div class="row" style="margin:8px 0"><button data-a="ag" data-n="-1">‹</button><input type="date" value="${d}" data-a="agpick" style="width:auto"><button data-a="ag" data-n="1">›</button></div><div class="sess">${sessionsOn(d).map(s => `<div class="card row sp"><span><b>${ft(s.start)}–${ft(s.end)}</b> ${esc(s.subject)} <span class="sub">${esc(s.type)}</span></span>${badge(s.status, STL[s.status])}</div>`).join('') || '<div class="card mut">No sessions.</div>'}</div>`;
+  } else if (ui.tab === 'upcoming') {
+    const up = E.generateSessions(S, now.date, E.addDays(now.date, 21)).filter(s => E.isFuture(s, now) || s.status === 'cancelled').slice(0, 40);
+    body = `<div class="card" style="margin-top:8px">${up.map(s => `<div class="row sp" style="padding:4px 0"><span>${fd(s.date)} ${ft(s.start)} · ${esc(s.subject)} <span class="sub">${esc(s.type)}</span></span>${s.status === 'cancelled' ? badge('cancelled', 'Cancelled' + (s.eventName ? ' · ' + s.eventName : '')) : `<span class="sub">${fh(s.dur)}</span>`}</div>`).join('') || '<span class="mut">Nothing upcoming.</span>'}</div>`;
+  } else if (ui.tab === 'template') {
+    body = `<p class="sub">Edits here change future, unrecorded sessions only. Anything you've already recorded keeps its original subject and times.</p><button class="pri" data-a="addslot">+ Add recurring slot</button>
+    ${[1, 2, 3, 4, 5, 6].map(dn => `<h2>${DN[dn]}</h2><div class="card">${S.template.filter(x => x.day === dn).sort((a, b) => E.toMin(a.start) - E.toMin(b.start)).map(x => `<div class="row sp" style="padding:4px 0"><span>${ft(x.start)}–${ft(x.end)} · <b>${x.clinical ? 'Clinical posting (' + esc(E.rotationDept(now.date < S.settings.startDate ? S.settings.startDate : now.date, S.rotation) || 'dept by rotation') + ' now)' : esc(x.subject)}</b> <span class="sub">${esc(x.type)}</span></span><span><button class="sm" data-a="editslot" data-id="${x.id}">Edit</button> <button class="sm dng" data-a="delslot" data-id="${x.id}">Delete</button></span></div>`).join('')}</div>`).join('')}`;
+  } else {
+    body = `<p class="sub">Add holidays, closures and exam periods. Cancelled classes are excluded from attendance, never counted as absences. Recorded sessions are never deleted.</p><button class="pri" data-a="addev">+ Add holiday / event</button>
+    <div class="card" style="margin-top:10px">${S.events.slice().sort((a, b) => a.from < b.from ? -1 : 1).map(e => `<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div class="row sp"><b>${esc(e.name)}</b><span><button class="sm" data-a="editev" data-id="${e.id}">Edit</button> <button class="sm dng" data-a="delev" data-id="${e.id}">Delete</button></span></div><div class="sub">${fd(e.from, true)}${e.to !== e.from ? ' – ' + fd(e.to, true) : ''} · ${effLabel(e)}</div>${e.note ? `<div class="sub">${esc(e.note)}</div>` : ''}${e.statedWeekday && DN[E.dow(e.from)] !== e.statedWeekday ? `<div class="banner">Stated as ${esc(e.statedWeekday)}, but ${fd(e.from, true)} is a ${DN[E.dow(e.from)]}. Verify.</div>` : ''}</div>`).join('')}</div>`;
+  }
+  return `<div class="top"><h1>Timetable</h1></div><div class="chips" role="tablist">${tabs.map(([k, n]) => `<button role="tab" aria-pressed="${ui.tab === k}" data-a="tab" data-v="${k}">${n}</button>`).join('')}</div>${body}`;
+}
+
+/* ---------- Settings & backup ---------- */
+function settings() {
+  const st = S.settings, tr = tracks();
+  return `<div class="top"><h1>Settings &amp; backup</h1></div>
+  ${accountCard()}<h2>Backup</h2><div class="card"><p class="sub">${A ? 'Your data is synced to your private account so it follows you across devices. Still export a backup now and then.' : 'Your data lives only in this browser until you sign in and upload it.'} ${A ? '' : 'Clearing site data deletes it — export a backup regularly.'} Last export: ${S.meta.lastExport ? esc(S.meta.lastExport.slice(0, 10)) : 'never'}.</p>
+  <div class="row"><button class="pri" data-a="exp-json">Export backup (JSON)</button><button data-a="exp-rec">Records (CSV)</button><button data-a="exp-sum">Subject summary (CSV)</button></div>
+  <label>Restore from JSON backup</label><input type="file" accept=".json,application/json" id="imp" data-a="import"><p class="sub">You'll see a preview and can cancel before anything is replaced.</p></div>
+  <h2>Attendance rules</h2><div class="card">
+   <label>Target attendance (%)</label><input type="number" min="0" max="100" step="0.5" id="s-target" value="${st.target}">
+   <label>Grouping for eligibility</label><select id="s-group"><option value="subjectType" ${st.grouping === 'subjectType' ? 'selected' : ''}>Separately by subject + session type (default)</option><option value="subject" ${st.grouping === 'subject' ? 'selected' : ''}>Combine session types within each subject</option></select>
+   <label>Percentage is calculated against</label><select id="s-den"><option value="scheduled" ${st.denominator !== 'conducted' ? 'selected' : ''}>Total hours of the term (attended ÷ all scheduled hours) — default</option><option value="conducted" ${st.denominator === 'conducted' ? 'selected' : ''}>Hours conducted so far (reads 100% after one attended class)</option></select>
+   <label>Approved / authorised absences count as</label><select id="s-appr"><option value="excluded" ${st.approved === 'excluded' ? 'selected' : ''}>Excluded (removed from denominator)</option><option value="attended" ${st.approved === 'attended' ? 'selected' : ''}>Attended</option><option value="absent" ${st.approved === 'absent' ? 'selected' : ''}>Absent</option></select>
+   <label>Excluded session types (not counted in attendance)</label>${S.types.map(t => `<label class="chk"><input type="checkbox" class="s-ex" value="${esc(t)}" ${st.excludedTypes.includes(t) ? 'checked' : ''}>${esc(t)}</label>`).join('')}
+   <p class="sub">Term total = hours conducted so far + remaining scheduled hours (from the weekly template, minus holidays you've entered) + past sessions you haven't recorded yet. Session-count rules aren't supported. Sports is excluded by default; untick it to track Sports.</p>
+   <label class="chk"><input type="checkbox" id="s-pc" ${st.policyConfirmed ? 'checked' : ''}>I have confirmed these rules with the college</label>
+   <label>Term start / tracking begins</label><input type="date" id="s-start" value="${st.startDate}"><label>Teaching ends (attendance cutoff)</label><input type="date" id="s-teaching-end" value="${st.teachingEnds || '2027-06-13'}"><p class="sub">No attendance session after this date is counted. Default: 13 June 2027.</p><label>Term end (informational only)</label><input type="date" id="s-end" value="${st.termEnd}"><div class="banner">Date conflict: 30 Sep 2027 is Thursday, not Saturday. A separate description says 27 Sep 2027 (Monday), exactly 50 weeks after 12 Oct 2026. Term end does not affect attendance.</div>
+   <div class="row" style="margin-top:10px"><button class="pri" data-a="savesettings">Save rules</button></div><div id="s-err" class="err"></div></div>
+  <h2>Clinical posting batch</h2><div class="card"><div class="two"><div><label>My batch</label><input id="b-batch" value="${esc(st.batch)}"></div><div><label>Mapped rotation group</label><input id="b-group" value="${esc(st.group)}"></div></div>
+   <label class="chk"><input type="checkbox" id="b-conf" ${st.groupConfirmed ? 'checked' : ''}>Mapping confirmed</label><button data-a="savebatch">Save</button>
+   <h3 style="margin-top:14px">Rotation (department by date)</h3><p class="sub">Only dates from the college table are loaded. Later rotations are not invented — add them when published.</p>
+   ${S.rotation.slice().sort((a, b) => a.from < b.from ? -1 : 1).map(r => `<div class="row sp" style="padding:4px 0"><span>${fd(r.from, true)} – ${fd(r.to, true)} · <b>${esc(r.dept)}</b></span><span><button class="sm" data-a="editrot" data-id="${r.id}">Edit</button> <button class="sm dng" data-a="delrot" data-id="${r.id}">Delete</button></span></div>`).join('')}<button data-a="addrot" style="margin-top:8px">+ Add rotation</button></div>
+  <h2>Session types</h2><div class="card">${S.types.map(t => `<span class="badge s-nodata" style="margin:3px">${esc(t)} </span>`).join('')}<div class="row" style="margin-top:8px"><input id="newtype" placeholder="New session type" style="flex:1"><button data-a="addtype">Add</button></div></div>
+  <h2>Import previous totals</h2><div class="card"><p class="sub">Adds opening hours to a subject/session type (not tied to specific dates). Use once, if you were already attending before tracking started.</p>
+   <label>Track</label><input id="o-key" list="o-keys" placeholder="e.g. FMT — Theory lecture"><datalist id="o-keys">${Object.keys(tr).map(k => `<option value="${esc(k)}">`).join('')}</datalist>
+   <div class="two"><div><label>Attended hours</label><input id="o-att" type="number" min="0" step="0.25"></div><div><label>Conducted hours</label><input id="o-cond" type="number" min="0" step="0.25"></div></div>
+   ${Object.entries(S.opening).map(([k, o]) => `<div class="row sp"><span>${esc(k)}: ${fh(o.att)} / ${fh(o.cond)}</span><button class="sm dng" data-a="delopen" data-k="${esc(k)}">Remove</button></div>`).join('')}<button data-a="addopen" style="margin-top:8px">Save totals</button><div id="o-err" class="err"></div></div>
+  <h2>Appearance &amp; data</h2><div class="card row"><button data-a="theme">Toggle light/dark</button><button class="dng" data-a="reset">Reset everything…</button></div>
+  <h2>Guide</h2><div class="card sub">
+  <p><b>Daily:</b> open Today, tap Present/Absent per class (or “Mark finished sessions Present”). Nothing is counted until you tap.</p>
+  <p><b>Mistakes:</b> tap a status again, use Edit session (change times, subject, delete), or the Undo button right after any change. Past days: use the date picker or a subject's history.</p>
+  <p><b>Maths:</b> % = attended h ÷ (conducted h − excluded h). Hours needed = (T·C − A)/(1 − T). Max skippable = A + F − T(C+F), capped to [0, F]. Cancelled/holiday/future/lunch hours never enter the denominator.</p>
+  <p><b>Backup:</b> Export JSON often; Restore shows a preview first. <b>Devices:</b> while working locally, data stays in this browser. Once cloud sync is configured, sign in with the same email on each device.</p></div>`;
+}
+
+/* ---------- modals ---------- */
+function modalHTML() {
+  const m = ui.modal; let h = '';
+  const field = (id, label, val, type = 'text', extra = '') => `<label for="${id}">${label}</label><input id="${id}" type="${type}" value="${esc(val)}" ${extra}>`;
+  const typeSel = (id, v) => `<select id="${id}">${S.types.map(t => `<option ${t === v ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
+  if (m.type === 'partial') h = `<h2>Partial attendance</h2><p class="sub">${esc(m.s.subject)} · scheduled ${Math.round(m.s.dur * 60)} min</p>${field('m-min', 'Minutes actually attended', m.s.attMin != null ? m.s.attMin : Math.round(m.s.dur * 30), 'number', `min="0" max="${Math.round(m.s.dur * 60)}"`)}<div id="m-err" class="err"></div><div class="row" style="margin-top:12px"><button class="pri" data-a="savepartial">Save</button><button data-a="close">Cancel</button></div>`;
+  else if (m.type === 'confirm') h = `<h2>${esc(m.title)}</h2><p>${m.body}</p><div class="row"><button class="pri" data-a="${m.yes}">${esc(m.label || 'Confirm')}</button><button data-a="close">Cancel</button></div>`;
+  else if (m.type === 'session') { const s = m.s; h = `<h2>Edit session</h2><p class="sub">${fd(s.date, true)}</p>${field('m-sub', 'Subject', s.subject)}<label for="m-type">Session type</label>${typeSel('m-type', s.type)}<div class="two"><div>${field('m-st', 'Start', s.start, 'time')}</div><div>${field('m-en', 'End', s.end, 'time')}</div></div><div id="m-err" class="err"></div><div class="row" style="margin-top:12px"><button class="pri" data-a="savesess">Save changes</button><button class="dng" data-a="delsess">Remove session</button><button data-a="close">Cancel</button></div><p class="sub">Changing times only affects this one date. Removing hides it from every calculation (undo is available).</p>`; }
+  else if (m.type === 'extra') h = `<h2>Add extra class</h2>${field('m-date', 'Date', ui.date, 'date')}${field('m-sub', 'Subject', '')}<label for="m-type">Session type</label>${typeSel('m-type', 'Theory lecture')}<div class="two"><div>${field('m-st', 'Start', '14:00', 'time')}</div><div>${field('m-en', 'End', '15:00', 'time')}</div></div><div id="m-err" class="err"></div><div class="row" style="margin-top:12px"><button class="pri" data-a="saveextra">Add</button><button data-a="close">Cancel</button></div>`;
+  else if (m.type === 'slot') { const x = m.slot; h = `<h2>${m.isNew ? 'Add' : 'Edit'} recurring slot</h2><label for="m-day">Day</label><select id="m-day">${[1, 2, 3, 4, 5, 6].map(d => `<option value="${d}" ${x.day === d ? 'selected' : ''}>${DN[d]}</option>`).join('')}</select><div class="two"><div>${field('m-st', 'Start', x.start, 'time')}</div><div>${field('m-en', 'End', x.end, 'time')}</div></div>${field('m-sub', 'Subject', x.subject)}<label for="m-type">Session type</label>${typeSel('m-type', x.type)}<label class="chk"><input type="checkbox" id="m-cl" ${x.clinical ? 'checked' : ''}>Clinical posting (subject = department from rotation)</label><div id="m-err" class="err"></div><div class="row" style="margin-top:12px"><button class="pri" data-a="saveslot">Save</button><button data-a="close">Cancel</button></div>`; }
+  else if (m.type === 'rot') { const r = m.r; h = `<h2>${m.isNew ? 'Add' : 'Edit'} rotation</h2><div class="two"><div>${field('m-from', 'From', r.from, 'date')}</div><div>${field('m-to', 'To', r.to, 'date')}</div></div>${field('m-dept', 'Department', r.dept)}<div id="m-err" class="err"></div><div class="row" style="margin-top:12px"><button class="pri" data-a="saverot">Save</button><button data-a="close">Cancel</button></div>`; }
+  else if (m.type === 'event') { const e = m.e; const subs = [...new Set(S.template.map(x => x.subject).concat(['ENT', 'Paediatrics']))].filter(x => x !== 'Clinical Posting');
+    h = `<h2>${m.isNew ? 'Add' : 'Edit'} holiday / event</h2>${field('m-name', 'Name', e.name)}<div class="two"><div>${field('m-from', 'From', e.from, 'date')}</div><div>${field('m-to', 'To', e.to, 'date')}</div></div>
+    <label for="m-eff">Effect on regular teaching</label><select id="m-eff"><option value="all" ${e.effect === 'all' ? 'selected' : ''}>All teaching cancelled / exams replace classes</option><option value="subjects" ${e.effect === 'subjects' ? 'selected' : ''}>Only selected subjects cancelled</option><option value="types" ${e.effect === 'types' ? 'selected' : ''}>Only selected session types cancelled</option><option value="normal" ${e.effect === 'normal' ? 'selected' : ''}>Normal teaching continues</option></select>
+    <label>Subjects (for “selected subjects”)</label>${subs.map(s => `<label class="chk"><input type="checkbox" class="m-subj" value="${esc(s)}" ${(e.subjects || []).includes(s) ? 'checked' : ''}>${esc(s)}</label>`).join('')}
+    <label>Session types (for “selected session types”)</label>${S.types.map(s => `<label class="chk"><input type="checkbox" class="m-typ" value="${esc(s)}" ${(e.types || []).includes(s) ? 'checked' : ''}>${esc(s)}</label>`).join('')}
+    ${field('m-note', 'Note', e.note || '')}<div id="m-err" class="err"></div><div class="row" style="margin-top:12px"><button data-a="previewev">Preview affected sessions</button><button class="pri" data-a="saveevent">Save</button><button data-a="close">Cancel</button></div><div id="m-prev" class="banner info" style="display:none"></div>`; }
+  else if (m.type === 'chpw') h = `<h2>Change password</h2><p class="sub">Your data is re-encrypted with the new password. There is no recovery if you forget it.</p><label for="m-pw0">Current password</label><input id="m-pw0" type="password" autocomplete="current-password"><label for="m-pw1">New password (8+ characters)</label><input id="m-pw1" type="password" autocomplete="new-password"><label for="m-pw2">Repeat new password</label><input id="m-pw2" type="password" autocomplete="new-password"><div id="m-err" class="err"></div><div class="row" style="margin-top:12px"><button class="pri" data-a="dochpw">Change password</button><button data-a="close">Cancel</button></div>`;
+  else if (m.type === 'import') h = `<h2>Restore backup?</h2><p>This will <b>replace</b> your current data.</p><div class="kv"><span></span><span><b>Current → Backup</b></span><span>Recorded entries</span><span>${m.cur.e} → ${m.nu.e}</span><span>Extra sessions</span><span>${m.cur.x} → ${m.nu.x}</span><span>Timetable slots</span><span>${m.cur.t} → ${m.nu.t}</span><span>Events</span><span>${m.cur.v} → ${m.nu.v}</span><span>Target</span><span>${m.cur.T}% → ${m.nu.T}%</span></div><p class="sub">Tip: export your current data first if unsure. Undo is available after restoring.</p><div class="row"><button class="pri" data-a="doimport">Replace my data</button><button data-a="close">Cancel</button></div>`;
+  return `<div class="modalbg" data-a="bg"><div class="modal" role="dialog" aria-modal="true">${h}</div></div>`;
+}
+const val = id => { const e = document.getElementById(id); return e ? e.value : ''; };
+const err = t => { const e = $('#m-err'); if (e) e.textContent = t; return false; };
+function findSession(id, d) { return sessionsOn(d).find(s => s.id === id); }
+function setStatus(id, d, st, attMin) {
+  const s = findSession(id, d); if (!s) return;
+  mutate(S => {
+    let en = S.entries[id] || (S.entries[id] = {});
+    if (st === 'none' && !en.edited) { delete S.entries[id]; return; }
+    en.status = st; en.snap = { start: s.start, end: s.end, subject: s.subject, type: s.type };
+    if (st === 'partial') en.attMin = attMin; else delete en.attMin;
+  }, STL[st] + ' — ' + s.subject);
+}
+async function saveFile(name, data) {
+  /* Standalone browser deployment uses the Blob download below. */
+  try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data])); a.download = name; document.body.appendChild(a); a.click(); a.remove(); return true; } catch (e) { toast('Download is not available in this view.'); return false; }
+}
+function counts(o) { return { e: Object.keys(o.entries).length, x: o.extras.length, t: o.template.length, v: o.events.length, T: o.settings.target }; }
+function eventFrom(e0) { const e = Object.assign({}, e0); e.name = val('m-name').trim(); e.from = val('m-from'); e.to = val('m-to'); e.effect = val('m-eff'); e.note = val('m-note'); e.subjects = [...document.querySelectorAll('.m-subj:checked')].map(x => x.value); e.types = [...document.querySelectorAll('.m-typ:checked')].map(x => x.value); e.unconfirmed = false; return e; }
+
+/* ---------- events ---------- */
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-a]'); if (!el) return; const a = el.dataset.a, d = el.dataset;
+  if (a === 'bg') { if (ev.target === el) { ui.modal = null; render(); } return; }
+  if (['note', 'datepick', 'fstatus', 'ffrom', 'fto', 'import', 'agpick'].includes(a)) return;
+  switch (a) {
+    case 'lmode': ui.lmode = d.v; return render();
+    case 'dologin': return doAuth(false, el);
+    case 'docreate': return doAuth(true, el);
+    case 'logout': return logout();
+    case 'gologin': if (A && dirty) flushNow().then(() => { S = null; history = []; ui.lmode = 'login'; render(); }); else { S = null; history = []; ui.lmode = 'login'; render(); } return;
+    case 'localmode': S = load(); save(); render(); return;
+    case 'chpw': toast('Change your password through Supabase account recovery / authentication settings.'); return;
+    case 'dochpw': return;
+    case 'delacct': ui.modal = { type: 'confirm', title: 'Delete attendance data from this app?', body: 'This clears the saved attendance row for your signed-in account. It does not delete your Supabase login. Export a JSON backup first. This cannot be undone.', yes: 'dodelacct', label: 'Delete attendance data' }; return render();
+    case 'dodelacct': return deleteAccount();
+    case 'conf-load': return conflictLoad();
+    case 'conf-over': return conflictOverwrite();
+    case 'seed-dismiss': ui.seedNote = 0; return render();
+    case 'nav': ui.view = d.v; ui.subj = null; window.scrollTo(0, 0); return render();
+    case 'undo': return undo();
+    case 'close': ui.modal = null; return render();
+    case 'day': ui.date = E.addDays(ui.date, +d.n); return render();
+    case 'gotoday': ui.date = now.date; return render();
+    case 'set': if (d.st === 'partial') { ui.modal = { type: 'partial', s: findSession(d.id, d.d) }; return render(); } return setStatus(d.id, d.d, d.st);
+    case 'savepartial': { const s = ui.modal.s, v = +val('m-min'); if (!(v >= 0 && v <= s.dur * 60)) return err('Enter minutes between 0 and ' + Math.round(s.dur * 60) + '.'); ui.modal = null; return setStatus(s.id, s.date, 'partial', v); }
+    case 'markall': { const ss = sessionsOn(ui.date).filter(s => s.status === 'none' && (s.date < now.date || E.toMin(s.end) <= now.min)); ui.modal = { type: 'confirm', title: 'Mark all Present?', body: `${ss.length} finished session${ss.length === 1 ? '' : 's'} on ${fd(ui.date, true)} will be marked <b>Present</b>. Already-recorded and cancelled sessions are not changed.`, yes: 'domarkall', label: 'Mark Present' }; return render(); }
+    case 'domarkall': { const ss = sessionsOn(ui.date).filter(s => s.status === 'none' && (s.date < now.date || E.toMin(s.end) <= now.min)); ui.modal = null; mutate(S => ss.forEach(s => { S.entries[s.id] = Object.assign(S.entries[s.id] || {}, { status: 'present', snap: { start: s.start, end: s.end, subject: s.subject, type: s.type } }); }), ss.length + ' marked Present'); return; }
+    case 'addextra': ui.modal = { type: 'extra' }; return render();
+    case 'saveextra': { const o = { id: uid('x_'), date: val('m-date'), subject: val('m-sub').trim(), type: val('m-type'), start: val('m-st'), end: val('m-en') }; if (!E.isDate(o.date) || !o.subject || !E.isTime(o.start) || !E.isTime(o.end) || E.toMin(o.end) <= E.toMin(o.start)) return err('Enter a date, subject, and an end time after the start time.'); ui.modal = null; ui.date = o.date; mutate(S => S.extras.push(o), 'Extra class added'); return; }
+    case 'editsess': { const s = findSession(d.id, d.d); if (s) { ui.modal = { type: 'session', s }; render(); } return; }
+    case 'savesess': { const s = ui.modal.s, v = { subject: val('m-sub').trim(), type: val('m-type'), start: val('m-st'), end: val('m-en') }; if (!v.subject || !E.isTime(v.start) || !E.isTime(v.end) || E.toMin(v.end) <= E.toMin(v.start)) return err('Subject required and end must be after start.'); ui.modal = null; mutate(S => { const en = S.entries[s.id] || (S.entries[s.id] = {}); en.snap = v; en.edited = true; if (S.extras.find(x => x.id === s.id)) Object.assign(S.extras.find(x => x.id === s.id), v); }, 'Session updated'); return; }
+    case 'delsess': { const s = ui.modal.s; ui.modal = { type: 'confirm', title: 'Remove this session?', body: `${esc(s.subject)} on ${fd(s.date, true)} will be removed from all calculations${s.status !== 'none' ? ' <b>including its recorded attendance</b>' : ''}. You can undo right after.`, yes: 'dodelsess', label: 'Remove', sid: s.id }; ui.delId = s.id; return render(); }
+    case 'dodelsess': { const id = ui.delId; ui.modal = null; mutate(S => { S.entries[id] = { deleted: true }; S.extras = S.extras.filter(x => x.id !== id); }, 'Session removed'); return; }
+    case 'tab': ui.tab = d.v; return render();
+    case 'wk': ui.weekStart = +d.n === 0 ? E.mondayOf(now.date < S.settings.startDate ? S.settings.startDate : now.date) : E.addDays(ui.weekStart, +d.n); return render();
+    case 'ag': ui.agendaDate = E.addDays(ui.agendaDate, +d.n); return render();
+    case 'subj': ui.subj = d.k; window.scrollTo(0, 0); return render();
+    case 'back': ui.subj = null; return render();
+    case 'wipreset': { const P = { all: { windowN: 0, windowPct: 0, cancelWeeks: 0, extraHours: 0 }, miss2: { windowN: 2, windowPct: 0, cancelWeeks: 0, extraHours: 0 }, miss1: { windowN: 1, windowPct: 0, cancelWeeks: 0, extraHours: 0 }, half: { windowN: 1, windowPct: 50, cancelWeeks: 0, extraHours: 0 }, week: { windowN: 0, windowPct: 0, cancelWeeks: 1, extraHours: 0 }, extra: { windowN: 0, windowPct: 0, cancelWeeks: 0, extraHours: 4 }, reset: { windowN: 2, windowPct: 0, cancelWeeks: 0, extraHours: 0, target: '' } }[d.p]; Object.assign(ui.wi, P); return render(); }
+    case 'addslot': ui.modal = { type: 'slot', isNew: true, slot: { id: uid('s'), day: 1, start: '08:15', end: '09:15', subject: '', type: 'Theory lecture', clinical: false } }; return render();
+    case 'editslot': ui.modal = { type: 'slot', slot: Object.assign({}, S.template.find(x => x.id === d.id)) }; return render();
+    case 'saveslot': { const x = Object.assign({}, ui.modal.slot, { day: +val('m-day'), start: val('m-st'), end: val('m-en'), subject: val('m-sub').trim(), type: val('m-type'), clinical: $('#m-cl').checked }); if (x.clinical && !x.subject) x.subject = 'Clinical Posting'; if (!x.subject || !E.isTime(x.start) || !E.isTime(x.end) || E.toMin(x.end) <= E.toMin(x.start)) return err('Subject required and end must be after start.'); const isNew = ui.modal.isNew; if (isNew || x.id !== undefined) { x.id = isNew ? x.day + '-' + x.start.replace(':', '') + '-' + Math.random().toString(36).slice(2, 5) : x.id; } ui.modal = null; mutate(S => { const i = S.template.findIndex(y => y.id === x.id); if (i >= 0) S.template[i] = x; else S.template.push(x); }, 'Timetable updated'); return; }
+    case 'delslot': ui.modal = { type: 'confirm', title: 'Delete recurring slot?', body: 'Future unrecorded sessions from this slot disappear. Sessions you already recorded are kept.', yes: 'dodelslot', label: 'Delete' }; ui.delId = d.id; return render();
+    case 'dodelslot': { const id = ui.delId; const keep = Object.keys(S.entries).filter(k => k.endsWith('_' + id)); ui.modal = null; mutate(S => { S.template = S.template.filter(x => x.id !== id); const ex = []; keep.forEach(k => { const [dt] = k.split('_'); const en = S.entries[k]; if (en && en.status && en.status !== 'none' && en.snap) { S.extras.push({ id: k, date: dt, start: en.snap.start, end: en.snap.end, subject: en.snap.subject, type: en.snap.type }); } }); }, 'Slot deleted (recorded sessions kept)'); return; }
+    case 'addev': ui.modal = { type: 'event', isNew: true, e: { id: uid('ev'), name: '', kind: 'other', from: ui.date, to: ui.date, effect: 'all', subjects: [], types: [], note: '' } }; return render();
+    case 'editev': ui.modal = { type: 'event', e: Object.assign({}, S.events.find(x => x.id === d.id)) }; return render();
+    case 'previewev': { const e = eventFrom(ui.modal.e); const box = $('#m-prev'); if (!E.isDate(e.from) || !E.isDate(e.to) || e.to < e.from) { box.style.display = 'block'; box.textContent = 'Enter valid dates first.'; return; } const t = JSON.parse(JSON.stringify(S)); t.events = t.events.filter(x => x.id !== e.id).concat([e]); const ss = E.generateSessions(t, e.from, e.to); const aff = ss.filter(s => s.status === 'cancelled' && s.auto), kept = ss.filter(s => s.heldDespite); box.style.display = 'block'; box.innerHTML = `<b>${aff.length}</b> unrecorded session(s) (${fh(aff.reduce((a, s) => a + s.dur, 0))}) would be cancelled. <b>${kept.length}</b> already-recorded session(s) stay counted as held. ${aff.slice(0, 8).map(s => `<div>${fd(s.date)} ${ft(s.start)} ${esc(s.subject)}</div>`).join('')}${aff.length > 8 ? '<div>…</div>' : ''}`; return; }
+    case 'saveevent': { const e = eventFrom(ui.modal.e); if (!e.name) return err('Name is required.'); if (!E.isDate(e.from) || !E.isDate(e.to) || e.to < e.from) return err('Enter valid dates (end on or after start).'); if (e.effect === 'subjects' && !e.subjects.length) return err('Pick at least one subject.'); if (e.effect === 'types' && !e.types.length) return err('Pick at least one session type.'); ui.modal = null; mutate(S => { const i = S.events.findIndex(x => x.id === e.id); if (i >= 0) S.events[i] = e; else S.events.push(e); }, 'Calendar updated'); return; }
+    case 'delev': ui.modal = { type: 'confirm', title: 'Delete this event?', body: 'Sessions it cancelled will return to the schedule. Recorded attendance is untouched.', yes: 'dodelev', label: 'Delete' }; ui.delId = d.id; return render();
+    case 'dodelev': { const id = ui.delId; ui.modal = null; mutate(S => { S.events = S.events.filter(x => x.id !== id); }, 'Event deleted'); return; }
+    case 'savesettings': { const T = parseFloat(val('s-target')); const sd = val('s-start'), td = val('s-teaching-end') || '2027-06-13', ed = val('s-end'); const er = $('#s-err'); if (!(T >= 0 && T <= 100)) { er.textContent = 'Target must be between 0 and 100.'; return; } if (!E.isDate(sd) || !E.isDate(td) || td < sd || !E.isDate(ed) || ed < sd) { er.textContent = 'Check the start, teaching-end and informational term-end dates.'; return; } mutate(S => { Object.assign(S.settings, { target: T, grouping: val('s-group'), approved: val('s-appr'), denominator: val('s-den'), excludedTypes: [...document.querySelectorAll('.s-ex:checked')].map(x => x.value), policyConfirmed: $('#s-pc').checked, startDate: sd, teachingEnds: td, termEnd: ed }); }, 'Rules saved'); return; }
+    case 'savebatch': mutate(S => { S.settings.batch = val('b-batch').trim() || 'D'; S.settings.group = val('b-group').trim(); S.settings.groupConfirmed = $('#b-conf').checked; }, 'Batch saved'); return;
+    case 'addrot': ui.modal = { type: 'rot', isNew: true, r: { id: uid('r'), from: '', to: '', dept: '' } }; return render();
+    case 'editrot': ui.modal = { type: 'rot', r: Object.assign({}, S.rotation.find(x => x.id === d.id)) }; return render();
+    case 'saverot': { const r = Object.assign({}, ui.modal.r, { from: val('m-from'), to: val('m-to'), dept: val('m-dept').trim() }); if (!E.isDate(r.from) || !E.isDate(r.to) || r.to < r.from || !r.dept) return err('Enter valid dates and a department.'); const ov = S.rotation.find(x => x.id !== r.id && x.from <= r.to && r.from <= x.to); if (ov) return err('Overlaps an existing rotation (' + ov.dept + ', ' + ov.from + ' – ' + ov.to + ').'); ui.modal = null; mutate(S => { const i = S.rotation.findIndex(x => x.id === r.id); if (i >= 0) S.rotation[i] = r; else S.rotation.push(r); }, 'Rotation saved'); return; }
+    case 'delrot': mutate(S => { S.rotation = S.rotation.filter(x => x.id !== d.id); }, 'Rotation removed'); return;
+    case 'addtype': { const t = val('newtype').trim(); if (!t || S.types.includes(t)) return; mutate(S => S.types.push(t), 'Type added'); return; }
+    case 'addopen': { const k = val('o-key').trim(), a2 = parseFloat(val('o-att')), c2 = parseFloat(val('o-cond')); const er = $('#o-err'); if (!k || !(a2 >= 0) || !(c2 >= 0) || a2 > c2) { er.textContent = 'Enter a track name, and attended hours not above conducted hours.'; return; } mutate(S => { S.opening[k] = { att: a2, cond: c2 }; }, 'Opening totals saved'); return; }
+    case 'delopen': mutate(S => { delete S.opening[d.k]; }, 'Removed'); return;
+    case 'theme': { const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'; try { localStorage.setItem(KEY + '-theme', r.dataset.theme); } catch (_) {} return; }
+    case 'reset': ui.modal = { type: 'confirm', title: 'Reset everything?', body: 'This clears all attendance and restores the default timetable. Export a backup first. You can Undo straight after.', yes: 'doreset', label: 'Reset' }; return render();
+    case 'doreset': ui.modal = null; mutate(S0 => { const n = E.defaultState(); Object.keys(S0).forEach(k => delete S0[k]); Object.assign(S0, n); }, 'Reset to defaults'); return;
+    case 'exp-json': { S.meta.lastExport = new Date().toISOString(); save(); saveFile('attendance-backup-' + now.date + '.json', E.exportJSON(S)).then(() => render()); return; }
+    case 'exp-rec': saveFile('attendance-records-' + now.date + '.csv', E.recordsCSV(S, now)); return;
+    case 'exp-sum': saveFile('attendance-summary-' + now.date + '.csv', E.summaryCSV(tracks())); return;
+    case 'doimport': { const o = ui.pending; ui.pending = null; ui.modal = null; mutate(S0 => { Object.keys(S0).forEach(k => delete S0[k]); Object.assign(S0, o); }, 'Backup restored'); return; }
+  }
+});
+document.addEventListener('change', ev => {
+  const el = ev.target, a = el.dataset.a;
+  if (a === 'datepick') { if (E.isDate(el.value)) { ui.date = el.value; render(); } }
+  else if (a === 'agpick') { if (E.isDate(el.value)) { ui.agendaDate = el.value; render(); } }
+  else if (a === 'fstatus') { ui.f.status = el.value; render(); } else if (a === 'ffrom') { ui.f.from = el.value; render(); } else if (a === 'fto') { ui.f.to = el.value; render(); }
+  else if (a === 'note') { const s = findSession(el.dataset.id, el.dataset.d); if (s) { mutate(S => { const en = S.entries[s.id] || (S.entries[s.id] = {}); en.note = el.value; en.edited = true; if (!en.snap) en.snap = { start: s.start, end: s.end, subject: s.subject, type: s.type }; }, 'Note saved'); } }
+  else if (a === 'import') {
+    const f = el.files[0]; if (!f) return; const rd = new FileReader();
+    rd.onload = () => { try { const o = E.importJSON(rd.result); ui.pending = o; ui.modal = { type: 'import', cur: counts(S), nu: counts(o) }; } catch (e) { ui.modal = { type: 'confirm', title: 'Cannot restore', body: esc(e.message) + ' Nothing was changed.', yes: 'close', label: 'OK' }; } el.value = ''; render(); };
+    rd.readAsText(f);
+  }
+});
+document.addEventListener('input', ev => { const k = ev.target.dataset && ev.target.dataset.wi; if (k) { ui.wi[k] = ev.target.value; renderWI(); } });
+document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && !S && /^l-/.test(ev.target.id || '')) { const b = $('[data-a=dologin],[data-a=docreate]'); if (b) b.click(); } if (ev.key === 'Escape' && ui.modal) { ui.modal = null; render(); } });
+
+
+/* ---------- Supabase Auth + private, per-user cloud state ---------- */
+const SUPABASE_URL = 'https://dgfylnsieegmyxdhvcmj.supabase.co';
+// This is the Supabase publishable/anon key, not a service-role secret. Set it before deployment.
+const SUPABASE_ANON_KEY = 'sb_publishable_S9BLz1_Q-PF0aoj9n68f-Q_nb-a3gnk';
+let flushing = false, dirty = false, timer = null;
+function scheduleCloud() { dirty = true; ui.sync = 'pending'; drawSync(); clearTimeout(timer); timer = setTimeout(flushNow, 700); }
+function syncText() { return { idle: 'Saved', pending: 'Unsaved changes…', saving: 'Saving…', saved: 'Synced ✓', error: 'Not synced ⚠ ' + (ui.syncErr || '') }[ui.sync]; }
+function drawSync() { const e = $('#sync'); if (e) e.textContent = syncText(); }
+function accountRow() { if (A) return '<div class="row sp sub" style="margin-bottom:6px"><span>☁ <b>'+esc(A.email)+'</b> · <span id="sync" role="status">'+esc(syncText())+'</span></span><button class="sm" data-a="logout">Log out</button></div>'; if (cloud.ok) return '<div class="row sp sub" style="margin-bottom:6px"><span>Local mode — data stays on this device only</span><button class="sm" data-a="gologin">Log in / create account</button></div>'; return ''; }
+function accountCard() {
+  if (A) return '<h2>Account</h2><div class="card"><p>Signed in as <b>'+esc(A.email)+'</b>. Status: <span class="sub">'+esc(syncText())+'</span></p><div class="row"><button data-a="logout">Log out</button></div><p class="sub">Your attendance state is stored in your private Supabase account row. Access is restricted with row-level security. Keep exporting JSON backups periodically.</p></div>';
+  return cloud.ok ? '<h2>Account</h2><div class="card"><p class="sub">You are in local mode. Log in to sync attendance across your devices.</p><button class="pri" data-a="gologin">Log in / create account</button></div>' : '<h2>Account</h2><div class="card"><div class="banner">Cloud sync is not configured yet. Add your Supabase publishable/anon key to <code>SUPABASE_ANON_KEY</code> in the app source after running the attendance SQL migration. Until then, data stays in this browser.</div></div>';
+}
+async function flushNow() {
+  clearTimeout(timer); if (!A || ui.conflict || !dirty || flushing) return;
+  flushing = true; dirty = false; ui.sync = 'saving'; drawSync();
+  try {
+    const { data: current, error: readErr } = await cloud.client.from('attendance_tracker_state').select('state, revision').eq('user_id', A.id).maybeSingle();
+    if (readErr) throw readErr;
+    const expected = A.revision || 0, actual = current ? Number(current.revision || 0) : 0;
+    if (actual !== expected) { ui.conflict = true; ui.sync = 'error'; ui.syncErr = 'changed on another device'; dirty = true; flushing = false; render(); return; }
+    const { data: saved, error } = await cloud.client.rpc('save_attendance_tracker_state', { p_state: S, p_expected_revision: expected });
+    if (error) throw error;
+    const row = Array.isArray(saved) ? saved[0] : saved;
+    if (!row || row.ok !== true) { ui.conflict = true; ui.sync = 'error'; ui.syncErr = 'changed on another device'; dirty = true; flushing = false; render(); return; }
+    A.revision = Number(row.revision); ui.sync = 'saved';
+  } catch (e) { ui.sync = 'error'; ui.syncErr = (e && e.message) || 'unknown error'; dirty = true; }
+  flushing = false; drawSync(); if (dirty && ui.sync !== 'error') flushNow();
+}
+async function loadCloudState(uid) {
+  const { data, error } = await cloud.client.from('attendance_tracker_state').select('state, revision').eq('user_id', uid).maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  const state = E.migrate(data.state), validation = E.validate(state);
+  if (validation.length) throw new Error('Cloud attendance data failed validation: ' + validation[0]);
+  return { state, revision: Number(data.revision || 0) };
+}
+function loginHTML() {
+  const create = ui.lmode === 'create'; let hasLocal = false; try { hasLocal = !!localStorage.getItem(KEY); } catch (_) {}
+  let h = '<div class="top"><h1>Attendance tracker</h1></div><div class="card" style="max-width:440px;margin:10px auto"><div class="chips" role="group">' +
+    '<button data-a="lmode" data-v="login" aria-pressed="' + (!create) + '">Log in</button><button data-a="lmode" data-v="create" aria-pressed="' + create + '">Create account</button></div>' +
+    '<label for="l-user">Email address</label><input id="l-user" type="email" autocomplete="email" autocapitalize="off" spellcheck="false" required>' +
+    '<label for="l-pw">Password' + (create ? ' (8+ characters)' : '') + '</label><input id="l-pw" type="password" autocomplete="' + (create ? 'new-password' : 'current-password') + '" required>';
+  if (create) h += '<label for="l-pw2">Repeat password</label><input id="l-pw2" type="password" autocomplete="new-password" required>' +
+    (hasLocal ? '<label class="chk"><input type="checkbox" id="l-imp" checked>Import the attendance data saved on this device into my new account</label>' : '') +
+    '<div class="banner">Use an email address you control. Verify your email if Supabase asks you to. The first successful account sync will store this tracker state in your private account.</div>';
+  h += '<div id="l-err" class="err" role="alert"></div><button class="pri" data-a="' + (create ? 'docreate' : 'dologin') + '" style="width:100%;margin-top:10px">' + (create ? 'Create account' : 'Log in') + '</button>' +
+    '<p class="sub">Accounts use Supabase email/password authentication. Each account can access only its own attendance data.</p>' +
+    '<button class="link" data-a="localmode">Continue on this device only</button></div>';
+  return h;
+}
+async function doAuth(create, btn) {
+  const err = t => { const el = $('#l-err'); if (el) el.textContent = t; btn.disabled = false; btn.textContent = create ? 'Create account' : 'Log in'; return false; };
+  const email = String(val('l-user') || '').trim().toLowerCase(), pw = val('l-pw');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('Enter a valid email address.');
+  if (pw.length < 8) return err('Password must be at least 8 characters.');
+  if (create && pw !== val('l-pw2')) return err('Passwords do not match.');
+  btn.disabled = true; btn.textContent = create ? 'Creating…' : 'Logging in…';
+  try {
+    if (create) {
+      const { data, error } = await cloud.client.auth.signUp({ email, password: pw });
+      if (error) return err(error.message);
+      if (!data.session) return err('Account created. Check your email to confirm the address, then return here and log in.');
+      const uid = data.user.id, cb = $('#l-imp'); let state = E.defaultState(), imported = false;
+      if (cb && cb.checked) { try { const raw = localStorage.getItem(KEY); if (raw) { const parsed = E.migrate(JSON.parse(raw)); if (E.validate(parsed).length) throw new Error('Local data is invalid'); state = parsed; imported = true; } } catch (e) { return err('Could not import the saved local data: ' + e.message); } }
+      A = { id: uid, email, revision: 0 }; S = state; dirty = true; ui.sync = 'saving'; await flushNow();
+      if (ui.sync !== 'saved') { const message = ui.syncErr || 'save failed'; A = null; S = null; return err('Account created, but attendance data did not sync: ' + message); }
+      if (imported) { try { localStorage.removeItem(KEY); } catch (_) {} }
+    } else {
+      const { data, error } = await cloud.client.auth.signInWithPassword({ email, password: pw });
+      if (error) return err(error.message);
+      const uid = data.user.id, row = await loadCloudState(uid);
+      if (row) { S = seedMerge(row.state); A = { id: uid, email, revision: row.revision }; ui.sync = 'saved'; }
+      else {
+        let local = null; try { const raw = localStorage.getItem(KEY); if (raw) local = E.importJSON(raw); } catch (_) {}
+        if (local && confirm('This account has no cloud attendance data yet. Upload the data currently saved on this device to this account? Choose Cancel to start with the default timetable.')) S = local;
+        else S = E.defaultState();
+        A = { id: uid, email, revision: 0 }; dirty = true; ui.sync = 'saving'; await flushNow();
+        if (ui.sync !== 'saved') { const message = ui.syncErr || 'save failed'; A = null; S = null; return err('Signed in, but initial attendance data did not sync: ' + message); }
+      }
+    }
+    history = []; ui.view = 'dashboard'; ui.date = null; ui.weekStart = null; ui.agendaDate = null; ui.subj = null; ui.conflict = false; render();
+  } catch (e) { return err('Something went wrong: ' + ((e && e.message) || e)); }
+}
+async function logout() {
+  if (dirty) await flushNow();
+  if (ui.sync === 'error' && !confirm('Your latest changes are not synced. Log out anyway?')) return;
+  try { if (S) localStorage.setItem(KEY, JSON.stringify(S)); } catch (_) {}
+  const { error } = await cloud.client.auth.signOut();
+  if (error) { toast('Logout failed: ' + error.message); return; }
+  A = null; S = load(); history = []; dirty = false; ui.lmode = 'login'; ui.conflict = false; ui.sync = 'idle'; render();
+}
+async function conflictLoad() {
+  try { const row = await loadCloudState(A.id); if (!row) throw new Error('No saved cloud data found.'); S = seedMerge(row.state); A.revision = row.revision; ui.conflict = false; ui.sync = 'saved'; dirty = false; history = []; render(); }
+  catch (e) { toast('Could not load: ' + e.message); }
+}
+async function conflictOverwrite() {
+  try {
+    const row = await loadCloudState(A.id);
+    A.revision = row ? row.revision : 0;
+    ui.conflict = false; dirty = true; ui.sync = 'pending';
+    await flushNow();
+    if (ui.sync === 'saved') toast('This device attendance replaced the latest cloud copy.');
+  } catch (e) { ui.conflict = true; toast('Could not overwrite: ' + e.message); render(); }
+}
+async function deleteAccount() {
+  try {
+    const { error } = await cloud.client.from('attendance_tracker_state').delete().eq('user_id', A.id);
+    if (error) throw error;
+    await cloud.client.auth.signOut(); A = null; S = null; ui.modal = null; dirty = false; ui.lmode = 'create'; render(); toast('Attendance data deleted. Your login still exists.');
+  } catch (e) { toast('Delete failed: ' + e.message); }
+}
+async function boot() {
+  ui.booting = true;
+  if (typeof window.supabase === 'undefined' || !window.supabase.createClient || !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes('PASTE_')) {
+    cloud = { ok: false, client: null, uid: null }; ui.booting = false; S = load(); save(); render(); return;
+  }
+  cloud.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+  cloud.ok = true;
+  try {
+    const { data, error } = await cloud.client.auth.getSession(); if (error) throw error;
+    const session = data.session;
+    if (session) {
+      const row = await loadCloudState(session.user.id);
+      if (row) { S = seedMerge(row.state); A = { id: session.user.id, email: session.user.email || '', revision: row.revision }; ui.sync = 'saved'; }
+      else { S = load(); A = { id: session.user.id, email: session.user.email || '', revision: 0 }; dirty = true; await flushNow(); }
+    } else { S = load(); }
+  } catch (e) { cloud.ok = false; ui.loadError = 'Cloud connection failed: ' + ((e && e.message) || e) + '. Your browser copy has not been deleted.'; S = load(); A = null; }
+  ui.booting = false; render();
+  if (cloud.client) cloud.client.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' && !session && A) { A = null; S = load(); dirty = false; render(); }
+  });
+}
+window.addEventListener('pagehide', () => { if (A && dirty) flushNow(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && A && dirty) flushNow(); });
+
+try { const th = localStorage.getItem(KEY + '-theme'); if (th) document.documentElement.dataset.theme = th; } catch (_) {}
+boot();
+setInterval(() => { if (!S) return; const n = E.nowIST(); if (n.date !== now.date && !ui.modal) { if (ui.date === now.date) ui.date = n.date; render(); } }, 60000);
+window.__att = { E, get state() { return S; } };
+})();
+</script>
+</body>
+</html>
